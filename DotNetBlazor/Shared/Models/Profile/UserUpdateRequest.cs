@@ -1,0 +1,13 @@
+﻿namespace DotNetBlazor.Shared.Models.Profile
+{
+    public class UserUpdateRequest
+    {
+        public string Id { get; set; } = null!;
+        public string? FullName { get; set; }
+        public string? Mobile { get; set; }
+        public string? Gender { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? CurrentAddress { get; set; }
+        public string? DocumentUrl { get; set; }
+    }
+}

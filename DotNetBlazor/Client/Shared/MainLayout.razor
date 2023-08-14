@@ -1,0 +1,41 @@
+﻿@using DotNetBlazor.Client.Utility;
+@inherits LayoutComponentBase
+
+@inject NavigationManager NavigationManager
+@inject ICacheHelper CacheHelper
+
+<div class="page">
+    @if (TokenExists)
+    {
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+        <main>
+            <div class="top-row px-4">
+                <a href="/logout">Logout</a>
+            </div>
+
+            <article class="content px-4">
+                <AlertMessage />
+
+                @Body
+            </article>
+        </main>
+    }
+    else
+    {
+        <p>You are not authenticated. Redirecting to login...</p>
+        NavigationManager.NavigateTo("/account/login?returnUrl=" + NavigationManager.Uri);
+    }
+</div>
+
+
+@code {
+    private bool TokenExists;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TokenExists = !string.IsNullOrEmpty(await CacheHelper.GetTokenAsync());
+    }
+}
