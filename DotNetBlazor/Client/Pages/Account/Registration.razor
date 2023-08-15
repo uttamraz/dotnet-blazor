@@ -55,9 +55,18 @@
         loading = true;
         try
         {
-            await AccountService.RegisterAsync(model);
-            AlertService.Success("Registration successful", keepAfterRouteChange: true);
-            NavigationManager.NavigateTo("account/login");
+            var response = await AccountService.RegisterAsync(this, model);
+            if (response?.Response?.Status == 200)
+            {
+                AlertService.Success("Registration Successful!", keepAfterRouteChange: true);
+                NavigationManager.NavigateTo("account/login");
+            }
+            else
+            {
+                AlertService.Error(response?.Response?.Message);
+                loading = false;
+                StateHasChanged();
+            }
         }
         catch (Exception ex)
         {

@@ -6,16 +6,6 @@ namespace DotNetBlazor.Shared.Models.Profile
     {
         public UserDetailResponseData Data { get; set; }
         public Response Response { get; set; }
-
-        public UserDetailResponse(UserDetailResponseData data, int status, string message)
-        {
-            Data = data;
-            Response = new Response
-            {
-                Status = status,
-                Message = message
-            };
-        }
     }
 
     public class UserDetailResponseData

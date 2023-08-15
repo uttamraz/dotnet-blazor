@@ -2,6 +2,7 @@
 @layout EmptyLayout
 @using DotNetBlazor.Client.Services;
 @using DotNetBlazor.Shared.Models.Account;
+@using System.Net;
 
 @inject IAccountService AccountService
 @inject IAlertService AlertService
@@ -50,13 +51,13 @@
         try
         {
             var response = await AccountService.LoginAsync(this, model);
-            if (response.Status == 200)
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
                 NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard");
             }
             else
             {
-                AlertService.Error(response.Message);
+                AlertService.Error(response?.Response?.Message);
                 loading = false;
                 StateHasChanged();
             }

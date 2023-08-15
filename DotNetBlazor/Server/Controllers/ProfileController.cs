@@ -1,6 +1,9 @@
 ﻿using DotNetBlazor.Server.Services.ProfileService;
+using DotNetBlazor.Server.Utility.Helpers;
+using DotNetBlazor.Shared.Models.Common;
 using DotNetBlazor.Shared.Models.Profile;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace DotNetBlazor.Server.Controllers
 {
@@ -22,9 +25,9 @@ namespace DotNetBlazor.Server.Controllers
             var data = await _profileService.UpdateUser(request);
             if (data != null)
             {
-                return Ok(new UserDetailResponse(data, StatusCodes.Status200OK, "Success!"));
+                return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Success!"));
             }
-            return BadRequest(new UserDetailResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
+            return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
         }
 
         [HttpPost("ChangePassword")]
@@ -35,9 +38,9 @@ namespace DotNetBlazor.Server.Controllers
             var data = await _profileService.ChangePassword(request);
             if (data != null && data.IsSuccess)
             {
-                return Ok(new ChangePasswordResponse(data, StatusCodes.Status200OK, "Success!"));
+                return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Success!"));
             }
-            return BadRequest(new ChangePasswordResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
+            return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
         }
 
         [HttpGet("UserDetail")]
@@ -48,9 +51,9 @@ namespace DotNetBlazor.Server.Controllers
             var data = await _profileService.UserDetail();
             if (data != null)
             {
-                return Ok(new UserDetailResponse(data, StatusCodes.Status200OK, "Success!"));
+                return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Success!"));
             }
-            return BadRequest(new UserDetailResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
+            return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
         }
     }
 }

@@ -31,7 +31,7 @@ namespace DotNetBlazor.Server.Utility.Middleware
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 };
-                var message = JsonSerializer.Serialize(new CommonResponse(null, new Response { Status = StatusCodes.Status401Unauthorized, Message = HttpStatusCode.Unauthorized.ToString() }), options);
+                var message = JsonSerializer.Serialize(new CommonResponse(null, StatusCodes.Status401Unauthorized, HttpStatusCode.Unauthorized.ToString()), options);
                 var authorizationId = _contextHelper.Token();
                 if (string.IsNullOrEmpty(authorizationId))
                 {

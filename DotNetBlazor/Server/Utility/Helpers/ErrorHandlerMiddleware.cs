@@ -68,8 +68,7 @@ namespace DotNetBlazor.Server.Utility.Helpers
                     {
                         Message = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Production"
                     || response.StatusCode != StatusCodes.Status500InternalServerError ? error?.Message : "Internal Server Error"
-                    },
-                    new Response() { Status = response.StatusCode, Message = message }
+                    }, response.StatusCode, message
                     );
 
                 if (response.StatusCode == StatusCodes.Status422UnprocessableEntity)

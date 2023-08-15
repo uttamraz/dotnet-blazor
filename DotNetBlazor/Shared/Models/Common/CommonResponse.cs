@@ -5,10 +5,14 @@
         public object Data { get; set; }
         public Response Response { get; set; }
 
-        public CommonResponse(object data, Response response)
+        public CommonResponse(object data, int status, string message)
         {
             Data = data;
-            Response = response;
+            Response = new Response
+            {
+                Status = status,
+                Message = message
+            };
         }
     }
 

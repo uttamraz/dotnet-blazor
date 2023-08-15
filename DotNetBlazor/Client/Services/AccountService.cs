@@ -1,17 +1,16 @@
 ﻿using DotNetBlazor.Client.Utility;
 using DotNetBlazor.Shared.Models.Account;
-using DotNetBlazor.Shared.Models.Common;
 using Microsoft.AspNetCore.Components;
 using System.Net;
-using System.Net.Http.Json;
 
 namespace DotNetBlazor.Client.Services
 {
     public interface IAccountService
     {
-        Task<Response> LoginAsync(LoginRequest request);
+        Task<LoginResponse> LoginAsync(ComponentBase component, LoginRequest request);
         Task LogoutAsync();
-        Task<Response> RegisterAsync(RegistrationRequest request);
+        public bool IsAuthenticated();
+        Task<RegistrationResponse> RegisterAsync(ComponentBase component, RegistrationRequest request);
     }
 
     public class AccountService : IAccountService
@@ -27,55 +26,26 @@ namespace DotNetBlazor.Client.Services
 
         public async Task<LoginResponse> LoginAsync(ComponentBase component, LoginRequest request)
         {
-            var responseData = new LoginResponse(null, (int)HttpStatusCode.InternalServerError, "Internal Server Error");
             var response = await _apiHelper.Post<LoginResponse>(component, "api/v1/account/login", request);
-
-            if ((int)response.StatusCode == (int)HttpStatusCode.OK)
+            if (response?.Response?.Status == (int)HttpStatusCode.OK && !string.IsNullOrEmpty(response?.Data?.Token))
             {
-                responseData = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                await _cacheHelper.SetTokenAsync(response?.Data?.Token);
             }
-            if ((int)response.StatusCode == (int)HttpStatusCode.UnprocessableEntity)
-            {
-                var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
-                responseData.Response = errorData.Response;
-            }
-            else
-            {
-                var commonData = await response.Content.ReadFromJsonAsync<CommonResponse>();
-                responseData.Response = commonData.Response;
-            }
-            return responseData;
+            return response;
         }
 
         public async Task LogoutAsync()
         {
             await _cacheHelper.RemoveTokenAsync();
         }
-
-        public bool IsAuthenticated => !string.IsNullOrWhiteSpace(_cacheHelper.GetTokenAsync().Result);
-
-
-
-
-        public async Task<Response> RegisterAsync(RegistrationRequest request)
+        public async Task<RegistrationResponse> RegisterAsync(ComponentBase component, RegistrationRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/v1/account/register", request);
+            return await _apiHelper.Post<RegistrationResponse>(component, "api/v1/account/register", request);
+        }
 
-            if (response.IsSuccessStatusCode)
-            {
-                var regnResponse = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
-                return regnResponse?.Response;
-            }
-            else if (response.StatusCode == HttpStatusCode.Conflict)
-            {
-                // Handle conflict (e.g., email already exists)
-            }
-            else
-            {
-                // Handle other registration failure scenarios
-            }
-
-            return new Response { Status = (int)HttpStatusCode.InternalServerError, Message = "Internal Server Error!" };
+        public bool IsAuthenticated()
+        {
+            return !string.IsNullOrWhiteSpace(_cacheHelper.GetTokenAsync().Result);
         }
     }
 

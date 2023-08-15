@@ -1,6 +1,7 @@
 ﻿using DotNetBlazor.Server.Helpers.Attributes;
 using DotNetBlazor.Server.Services.AccountService;
 using DotNetBlazor.Shared.Models.Account;
+using DotNetBlazor.Shared.Models.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotNetBlazor.Server.Controllers
@@ -24,9 +25,9 @@ namespace DotNetBlazor.Server.Controllers
             var data = await _registrationService.RegisterUser(request);
             if (data != null)
             {
-                return Ok(new RegistrationResponse(data, StatusCodes.Status200OK, "Success!"));
+                return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Success!"));
             }
-            return BadRequest(new RegistrationResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
+            return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
         }
 
         [AllowAnonymous]
@@ -38,9 +39,9 @@ namespace DotNetBlazor.Server.Controllers
             var data = await _registrationService.Login(request);
             if (data != null && !string.IsNullOrEmpty(data.Token))
             {
-                return Ok(new LoginResponse(data, StatusCodes.Status200OK, "Logged in successfully!"));
+                return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Logged in successfully!"));
             }
-            return BadRequest(new LoginResponse(null, StatusCodes.Status400BadRequest, "Invalid username or password!"));
+            return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Invalid username or password!"));
         }
 
         //[AllowAnonymous]
@@ -52,9 +53,9 @@ namespace DotNetBlazor.Server.Controllers
         //    var data = await _registrationService.Logout(request);
         //    if (data != null)
         //    {
-        //        return Ok(new LoginResponse(data, StatusCodes.Status200OK, "Logout successfully!"));
+        //        return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Logout successfully!"));
         //    }
-        //    return BadRequest(new LoginResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
+        //    return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
         //}
     }
 }

@@ -1,4 +1,4 @@
-﻿using DotNetBlazor.Shared.Models.Account;
+﻿using DotNetBlazor.Client.Services;
 using DotNetBlazor.Shared.Models.Common;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -20,6 +20,7 @@ namespace DotNetBlazor.Client.Utility
     public class ApiHelper : IApiHelper
     {
         private readonly HttpClient _httpClient;
+        JsonSerializerOptions option = new() { PropertyNameCaseInsensitive = true };
 
         public ApiHelper(HttpClient httpClient)
         {
@@ -30,52 +31,52 @@ namespace DotNetBlazor.Client.Utility
         {
             var response = await _httpClient.GetAsync(url);
             var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return JsonSerializer.Deserialize<T>(content, option);
         }
 
         public async Task<T> Get<T>(ComponentBase component, string url)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+            var option = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            if ((int)response.StatusCode == (int)HttpStatusCode.UnprocessableEntity)
+            {
+                var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
+                SetFormErrors(component, errorData?.Data?.Errors);
+            }
+            return JsonSerializer.Deserialize<T>(content, option);
         }
 
         public async Task<T> Post<T>(string url, object data)
         {
             var response = await _httpClient.PostAsJsonAsync(url, data);
             var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return JsonSerializer.Deserialize<T>(content, option);
         }
 
         public async Task<T> Post<T>(ComponentBase component, string url, object data)
         {
             var response = await _httpClient.PostAsJsonAsync(url, data);
             var content = await response.Content.ReadAsStringAsync();
-            var option = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-            if ((int)response.StatusCode != (int)HttpStatusCode.OK)
+
+            if ((int)response.StatusCode == (int)HttpStatusCode.UnprocessableEntity)
             {
-                if ((int)response.StatusCode == (int)HttpStatusCode.UnprocessableEntity)
-                {
-                    var errorData = JsonSerializer.Deserialize<ValidationErrorResposne>(content, option);
-                    responseData.Response = errorData.Response;
-                }
-                else
-                {
-                    var commonData = JsonSerializer.Deserialize<CommonResponse>(content, option);
-                    responseData.Response = commonData.Response;
-                }
+                var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
+                SetFormErrors(component, errorData?.Data?.Errors);
             }
-            return JsonSerializer.Deserialize<T>(content, option);
+            return await response.Content.ReadFromJsonAsync<T>();
         }
 
         private void SetFormErrors(ComponentBase component, List<Error> errors)
         {
-            var editContext = component.GetType().GetProperty("editContext")?.GetValue(component) as EditContext;
-
-            if (editContext != null)
+            if (component.GetType().GetProperty("editContext")?.GetValue(component) is EditContext editContext)
             {
+                var messages = new ValidationMessageStore(editContext);
                 foreach (var error in errors)
                 {
-                    editContext.Err;
+                    messages.Add(editContext.Field(error.Field), error.Message);
                 }
                 editContext.NotifyValidationStateChanged();
             }
