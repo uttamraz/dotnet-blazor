@@ -1,37 +1,53 @@
 ﻿@page "/account/login"
 @layout EmptyLayout
 @using DotNetBlazor.Client.Services;
+@using DotNetBlazor.Client.Utility;
 @using DotNetBlazor.Shared.Models.Account;
 @using System.Net;
+@using DotNetBlazor.Shared.Models.Common;
 
 @inject IAccountService AccountService
 @inject IAlertService AlertService
 @inject NavigationManager NavigationManager
+@implements IDisposable
 
-<div class="card">
-    <h4 class="card-header">Login</h4>
-    <div class="card-body">
-        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label>Username</label>
-                <InputText @bind-Value="model.Email" class="form-control" />
-                <ValidationMessage For="@(() => model.Email)" />
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Login</h4>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="model" OnValidSubmit="OnValidSubmit">
+                        <ValidationHandler @ref="validationHandler" />
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Username</label>
+                            <InputText id="email" @bind-Value="model.Email" class="form-control" />
+                            <ValidationMessage For="@(() => model.Email)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <InputText id="password" @bind-Value="model.Password" type="password" class="form-control" />
+                            <ValidationMessage For="@(() => model.Password)" />
+                        </div>
+
+                        <button disabled="@loading" class="btn btn-primary">
+                            @if (loading)
+                            {
+                                <span class="spinner-border spinner-border-sm mr-1"></span>
+                            }
+                            Login
+                        </button>
+
+                        <NavLink href="account/register" class="btn btn-link">Don't have an account?</NavLink>
+                    </EditForm>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <InputText @bind-Value="model.Password" type="password" class="form-control" />
-                <ValidationMessage For="@(() => model.Password)" />
-            </div>
-            <button disabled="@loading" class="btn btn-primary">
-                @if (loading)
-                {
-                    <span class="spinner-border spinner-border-sm mr-1"></span>
-                }
-                Login
-            </button>
-            <NavLink href="account/register" class="btn btn-link">Register</NavLink>
-        </EditForm>
+        </div>
     </div>
 </div>
 
@@ -41,19 +57,28 @@
 
     [SupplyParameterFromQuery]
     public string ReturnUrl { get; set; }
+    private ValidationHandler validationHandler;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AccountService.ValidationError += HandleValidationError;
+        if (await AccountService.IsAuthenticated())
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
 
     private async void OnValidSubmit()
     {
-        // reset alerts on submit
         AlertService.Clear();
 
         loading = true;
         try
         {
-            var response = await AccountService.LoginAsync(this, model);
+            var response = await AccountService.LoginAsync(model);
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
-                NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard");
+                NavigationManager.NavigateTo(ReturnUrl ?? "/");
             }
             else
             {
@@ -68,5 +93,16 @@
             loading = false;
             StateHasChanged();
         }
+    }
+
+
+    private void HandleValidationError(List<Error> errors)
+    {
+        validationHandler.DisplayErrors(errors);
+    }
+
+    public void Dispose()
+    {
+        AccountService.ValidationError -= HandleValidationError;
     }
 }

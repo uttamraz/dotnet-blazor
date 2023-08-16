@@ -1,7 +1,4 @@
-﻿using DotNetBlazor.Client.Services;
-using DotNetBlazor.Shared.Models.Common;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
+﻿using DotNetBlazor.Shared.Models.Common;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -11,16 +8,15 @@ namespace DotNetBlazor.Client.Utility
 
     public interface IApiHelper
     {
+        event Action<List<Error>> ValidationError;
         Task<T> Get<T>(string url);
-        Task<T> Get<T>(ComponentBase component, string url);
         Task<T> Post<T>(string url, object data);
-        Task<T> Post<T>(ComponentBase component, string url, object data);
     }
 
     public class ApiHelper : IApiHelper
     {
         private readonly HttpClient _httpClient;
-        JsonSerializerOptions option = new() { PropertyNameCaseInsensitive = true };
+        public event Action<List<Error>>? ValidationError;
 
         public ApiHelper(HttpClient httpClient)
         {
@@ -30,56 +26,38 @@ namespace DotNetBlazor.Client.Utility
         public async Task<T> Get<T>(string url)
         {
             var response = await _httpClient.GetAsync(url);
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(content, option);
-        }
-
-        public async Task<T> Get<T>(ComponentBase component, string url)
-        {
-            var response = await _httpClient.GetAsync(url);
-            var content = await response.Content.ReadAsStringAsync();
-            var option = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
             if ((int)response.StatusCode == (int)HttpStatusCode.UnprocessableEntity)
             {
                 var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
-                SetFormErrors(component, errorData?.Data?.Errors);
+                if (errorData?.Data?.Errors?.Count > 0)
+                {
+                    ValidationError?.Invoke(errorData?.Data?.Errors);
+                }
             }
-            return JsonSerializer.Deserialize<T>(content, option);
+            else
+            {
+                return await response.Content.ReadFromJsonAsync<T>();
+            }
+            return default(T);
         }
 
         public async Task<T> Post<T>(string url, object data)
         {
             var response = await _httpClient.PostAsJsonAsync(url, data);
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(content, option);
-        }
-
-        public async Task<T> Post<T>(ComponentBase component, string url, object data)
-        {
-            var response = await _httpClient.PostAsJsonAsync(url, data);
-            var content = await response.Content.ReadAsStringAsync();
-
 
             if ((int)response.StatusCode == (int)HttpStatusCode.UnprocessableEntity)
             {
                 var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
-                SetFormErrors(component, errorData?.Data?.Errors);
-            }
-            return await response.Content.ReadFromJsonAsync<T>();
-        }
-
-        private void SetFormErrors(ComponentBase component, List<Error> errors)
-        {
-            if (component.GetType().GetProperty("editContext")?.GetValue(component) is EditContext editContext)
-            {
-                var messages = new ValidationMessageStore(editContext);
-                foreach (var error in errors)
+                if (errorData?.Data?.Errors?.Count > 0)
                 {
-                    messages.Add(editContext.Field(error.Field), error.Message);
+                    ValidationError?.Invoke(errorData?.Data?.Errors);
                 }
-                editContext.NotifyValidationStateChanged();
             }
+            else
+            {
+                return await response.Content.ReadFromJsonAsync<T>();
+            }
+            return default(T);
         }
     }
 

@@ -20,7 +20,7 @@ namespace DotNetBlazor.Client.Services
 
         public void Success(string message, bool keepAfterRouteChange = false, bool autoClose = true)
         {
-            this.Alert(new Alert
+            Alert(new Alert
             {
                 Type = AlertType.Success,
                 Message = message,
@@ -31,7 +31,7 @@ namespace DotNetBlazor.Client.Services
 
         public void Error(string message, bool keepAfterRouteChange = false, bool autoClose = true)
         {
-            this.Alert(new Alert
+            Alert(new Alert
             {
                 Type = AlertType.Error,
                 Message = message,
@@ -42,7 +42,7 @@ namespace DotNetBlazor.Client.Services
 
         public void Info(string message, bool keepAfterRouteChange = false, bool autoClose = true)
         {
-            this.Alert(new Alert
+            Alert(new Alert
             {
                 Type = AlertType.Info,
                 Message = message,
@@ -58,7 +58,7 @@ namespace DotNetBlazor.Client.Services
 
         private void SetAlert(string message, bool keepAfterRouteChange = false, bool autoClose = true)
         {
-            this.Alert(new Alert
+            Alert(new Alert
             {
                 Type = AlertType.Warning,
                 Message = message,
@@ -69,13 +69,13 @@ namespace DotNetBlazor.Client.Services
 
         public void Alert(Alert alert)
         {
-            alert.Id = alert.Id ?? _defaultId;
-            this.OnAlert?.Invoke(alert);
+            alert.Id ??= _defaultId;
+            OnAlert?.Invoke(alert);
         }
 
         public void Clear(string id = _defaultId)
         {
-            this.OnAlert?.Invoke(new Alert { Id = id });
+            OnAlert?.Invoke(new Alert { Id = id });
         }
     }
 

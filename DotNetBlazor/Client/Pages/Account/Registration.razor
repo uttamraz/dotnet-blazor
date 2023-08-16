@@ -1,62 +1,85 @@
 ﻿@page "/account/register"
-@layout EmptyLayout
 @using DotNetBlazor.Client.Services;
+@using DotNetBlazor.Client.Utility;
 @using DotNetBlazor.Shared.Models.Account;
+@using System.Net;
+@using DotNetBlazor.Shared.Models.Common;
+@layout EmptyLayout
 @inject IAccountService AccountService
 @inject IAlertService AlertService
 @inject NavigationManager NavigationManager
+@implements IDisposable
 
-<div class="card">
-    <h4 class="card-header">Register</h4>
-    <div class="card-body">
-        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label>First Name</label>
-                <InputText @bind-Value="model.FullName" class="form-control" />
-                <ValidationMessage For="@(() => model.FullName)" />
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Register</h4>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="model" OnValidSubmit="OnValidSubmit">
+                        <ValidationHandler @ref="validationHandler" />
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <InputText id="fullName" @bind-Value="model.FullName" class="form-control" autocomplete="off" />
+                            <ValidationMessage For="@(() => model.FullName)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <InputText id="email" @bind-Value="model.Email" class="form-control" autocomplete="off" />
+                            <ValidationMessage For="@(() => model.Email)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <InputText id="password" @bind-Value="model.Password" type="password" class="form-control" autocomplete="off" />
+                            <ValidationMessage For="@(() => model.Password)" />
+                        </div>
+
+                        <button disabled="@loading" class="btn btn-primary">
+                            @if (loading)
+                            {
+                                <span class="spinner-border spinner-border-sm mr-1"></span>
+                            }
+                            Register
+                        </button>
+
+                        <NavLink href="account/login" class="btn btn-link">Already have an account?</NavLink>
+                    </EditForm>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Last Name</label>
-                <InputText @bind-Value="model.Email" class="form-control" />
-                <ValidationMessage For="@(() => model.Email)" />
-            </div>
-            <div class="form-group">
-                <label>Username</label>
-                <InputText @bind-Value="model.Password" type="password" class="form-control" />
-                <ValidationMessage For="@(() => model.Password)" />
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <InputText @bind-Value="model.Password" type="password" class="form-control" />
-                <ValidationMessage For="@(() => model.Password)" />
-            </div>
-            <button disabled="@loading" class="btn btn-primary">
-                @if (loading)
-                {
-                    <span class="spinner-border spinner-border-sm mr-1"></span>
-                }
-                Register
-            </button>
-            <NavLink href="account/login" class="btn btn-link">Cancel</NavLink>
-        </EditForm>
+        </div>
     </div>
 </div>
 
 @code {
     private RegistrationRequest model = new();
     private bool loading;
+    private ValidationHandler validationHandler;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AccountService.ValidationError += HandleValidationError;
+
+        if (await AccountService.IsAuthenticated())
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
 
     private async void OnValidSubmit()
     {
-        // reset alerts on submit
         AlertService.Clear();
 
         loading = true;
         try
         {
-            var response = await AccountService.RegisterAsync(this, model);
-            if (response?.Response?.Status == 200)
+            var response = await AccountService.RegisterAsync(model);
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
                 AlertService.Success("Registration Successful!", keepAfterRouteChange: true);
                 NavigationManager.NavigateTo("account/login");
@@ -74,5 +97,16 @@
             loading = false;
             StateHasChanged();
         }
+
+    }
+
+    private void HandleValidationError(List<Error> errors)
+    {
+        validationHandler.DisplayErrors(errors);
+    }
+
+    public void Dispose()
+    {
+        AccountService.ValidationError -= HandleValidationError;
     }
 }

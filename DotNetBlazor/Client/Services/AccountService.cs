@@ -1,32 +1,36 @@
 ﻿using DotNetBlazor.Client.Utility;
 using DotNetBlazor.Shared.Models.Account;
-using Microsoft.AspNetCore.Components;
+using DotNetBlazor.Shared.Models.Common;
+using Microsoft.AspNetCore.Components.Forms;
 using System.Net;
 
 namespace DotNetBlazor.Client.Services
 {
     public interface IAccountService
     {
-        Task<LoginResponse> LoginAsync(ComponentBase component, LoginRequest request);
+        Task<LoginResponse> LoginAsync(LoginRequest request);
         Task LogoutAsync();
-        public bool IsAuthenticated();
-        Task<RegistrationResponse> RegisterAsync(ComponentBase component, RegistrationRequest request);
+        public Task<bool> IsAuthenticated();
+        Task<RegistrationResponse> RegisterAsync(RegistrationRequest request);
+        event Action<List<Error>> ValidationError;
     }
 
     public class AccountService : IAccountService
     {
         private readonly IApiHelper _apiHelper;
         private readonly ICacheHelper _cacheHelper;
+        public event Action<List<Error>>? ValidationError;
 
         public AccountService(IApiHelper apiHelper, ICacheHelper cacheHelper)
         {
             _apiHelper = apiHelper;
             _cacheHelper = cacheHelper;
+            _apiHelper.ValidationError += SetValidationError;
         }
 
-        public async Task<LoginResponse> LoginAsync(ComponentBase component, LoginRequest request)
+        public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
-            var response = await _apiHelper.Post<LoginResponse>(component, "api/v1/account/login", request);
+            var response = await _apiHelper.Post<LoginResponse>("api/v1/account/login", request);
             if (response?.Response?.Status == (int)HttpStatusCode.OK && !string.IsNullOrEmpty(response?.Data?.Token))
             {
                 await _cacheHelper.SetTokenAsync(response?.Data?.Token);
@@ -38,14 +42,18 @@ namespace DotNetBlazor.Client.Services
         {
             await _cacheHelper.RemoveTokenAsync();
         }
-        public async Task<RegistrationResponse> RegisterAsync(ComponentBase component, RegistrationRequest request)
+        public async Task<RegistrationResponse> RegisterAsync(RegistrationRequest request)
         {
-            return await _apiHelper.Post<RegistrationResponse>(component, "api/v1/account/register", request);
+            return await _apiHelper.Post<RegistrationResponse>("api/v1/account/register", request);
         }
 
-        public bool IsAuthenticated()
+        public async Task<bool> IsAuthenticated()
         {
-            return !string.IsNullOrWhiteSpace(_cacheHelper.GetTokenAsync().Result);
+            return !string.IsNullOrWhiteSpace(await _cacheHelper.GetTokenAsync());
+        }
+        private void SetValidationError(List<Error> errors)
+        {
+            ValidationError?.Invoke(errors);
         }
     }
 
