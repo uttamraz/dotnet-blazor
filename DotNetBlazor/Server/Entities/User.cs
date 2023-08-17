@@ -21,7 +21,7 @@ namespace DotNetBlazor.Server.Entities
         [MaxLength(10), MinLength(1)]
         public string? Gender { get; set; }
         [MaxLength(20), MinLength(8), CheckUniqueUser]
-        public string? Mobile { get; set; } = null!;
+        public string? Mobile { get; set; }
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
         [MaxLength(100), MinLength(2)]

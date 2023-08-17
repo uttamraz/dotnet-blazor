@@ -43,19 +43,5 @@ namespace DotNetBlazor.Server.Controllers
             }
             return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Invalid username or password!"));
         }
-
-        //[AllowAnonymous]
-        //[HttpPost("Logout")]
-        //[ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-
-        //public async Task<IActionResult> Logout(LoginRequest request)
-        //{
-        //    var data = await _registrationService.Logout(request);
-        //    if (data != null)
-        //    {
-        //        return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Logout successfully!"));
-        //    }
-        //    return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
-        //}
     }
 }
