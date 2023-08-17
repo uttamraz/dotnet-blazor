@@ -1,8 +1,21 @@
 ﻿@page "/"
+@using DotNetBlazor.Client.Services;
+@using DotNetBlazor.Shared.Models.Profile;
+@inject IProfieService ProfileService
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Dashboard</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Hello, @(response.Data.FullName ?? "World")!</h1>
 
 Welcome to your new app.
 
+
+
+@code {
+    private UserDetailResponse response;
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await ProfileService.GetProfile();
+    }
+}

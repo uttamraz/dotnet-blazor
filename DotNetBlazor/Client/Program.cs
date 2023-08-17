@@ -13,5 +13,6 @@ builder.Services.AddScoped<ICacheHelper, CacheHelper>();
 builder.Services.AddScoped<IAlertService, AlertService>();
 builder.Services.AddScoped<IApiHelper, ApiHelper>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IProfieService, ProfileService>();
 
 await builder.Build().RunAsync();

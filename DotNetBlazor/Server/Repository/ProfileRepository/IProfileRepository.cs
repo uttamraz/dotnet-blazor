@@ -5,8 +5,8 @@ namespace DotNetBlazor.Server.Repository.ProfileRepository
 {
     public interface IProfileRepository
     {
-        Task<User> UpdateUser(User request);
-        Task<User> UserDetail(int userId);
+        Task<User> UpdateProfile(User request);
+        Task<User> GetProfile(int userId);
         Task<User> UserDetail(string email);
         Task<UpdatePasswordResponseData> UpdatePassword(UpdatePasswordRequest request);
     }

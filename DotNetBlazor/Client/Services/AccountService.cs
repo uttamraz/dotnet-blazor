@@ -6,12 +6,13 @@ using System.Net;
 
 namespace DotNetBlazor.Client.Services
 {
-    public interface IAccountService
+    public interface IAccountService : IDisposable
     {
         Task<LoginResponse> LoginAsync(LoginRequest request);
         Task LogoutAsync();
         public Task<bool> IsAuthenticated();
         Task<RegistrationResponse> RegisterAsync(RegistrationRequest request);
+
         event Action<List<Error>> ValidationError;
     }
 
@@ -51,9 +52,14 @@ namespace DotNetBlazor.Client.Services
         {
             return !string.IsNullOrWhiteSpace(await _cacheHelper.GetTokenAsync());
         }
-        private void SetValidationError(List<Error> errors)
+        private void SetValidationError(List<Error> list)
         {
-            ValidationError?.Invoke(errors);
+            ValidationError?.Invoke(list);
+        }
+
+        public void Dispose()
+        {
+            _apiHelper.ValidationError -= SetValidationError;
         }
     }
 

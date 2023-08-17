@@ -13,7 +13,7 @@ namespace DotNetBlazor.Server.Repository.ProfileRepository
             context = baseContext;
         }
 
-        public async Task<User> UpdateUser(User request)
+        public async Task<User> UpdateProfile(User request)
         {
             var data = await context.Users.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (data != null)
@@ -41,7 +41,7 @@ namespace DotNetBlazor.Server.Repository.ProfileRepository
             return request;
         }
 
-        public async Task<User> UserDetail(int id)
+        public async Task<User> GetProfile(int id)
         {
             return await context.Users.FirstOrDefaultAsync(x => x.Id == id);
         }

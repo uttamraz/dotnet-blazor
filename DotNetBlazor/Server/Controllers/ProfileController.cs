@@ -17,12 +17,12 @@ namespace DotNetBlazor.Server.Controllers
             _profileService = profileService;
         }
 
-        [HttpPost("UpdateUser")]
+        [HttpPost("UpdateProfile")]
         [ProducesResponseType(typeof(UserDetailResponse), StatusCodes.Status200OK)]
 
-        public async Task<IActionResult> UpdateUser(UserUpdateRequest request)
+        public async Task<IActionResult> UpdateProfile(UserUpdateRequest request)
         {
-            var data = await _profileService.UpdateUser(request);
+            var data = await _profileService.UpdateProfile(request);
             if (data != null)
             {
                 return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Success!"));
@@ -40,15 +40,15 @@ namespace DotNetBlazor.Server.Controllers
             {
                 return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Success!"));
             }
-            return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Bad Request!"));
+            return BadRequest(new CommonResponse(null, StatusCodes.Status400BadRequest, "Password change failed!"));
         }
 
-        [HttpGet("UserDetail")]
+        [HttpGet("GetProfile")]
         [ProducesResponseType(typeof(UserDetailResponse), StatusCodes.Status200OK)]
 
-        public async Task<IActionResult> UserDetail()
+        public async Task<IActionResult> GetProfile()
         {
-            var data = await _profileService.UserDetail();
+            var data = await _profileService.GetProfile();
             if (data != null)
             {
                 return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Success!"));

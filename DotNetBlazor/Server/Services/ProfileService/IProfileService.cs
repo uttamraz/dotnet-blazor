@@ -4,8 +4,8 @@ namespace DotNetBlazor.Server.Services.ProfileService
 {
     public interface IProfileService
     {
-        Task<UserDetailResponseData> UpdateUser(UserUpdateRequest request);
-        Task<UserDetailResponseData> UserDetail();
+        Task<UserDetailResponseData> UpdateProfile(UserUpdateRequest request);
+        Task<UserDetailResponseData> GetProfile();
         Task<ChangePasswordResponseData> ChangePassword(ChangePasswordRequest request);
     }
 }

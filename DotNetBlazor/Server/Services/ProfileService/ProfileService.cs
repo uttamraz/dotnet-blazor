@@ -3,6 +3,7 @@ using DotNetBlazor.Server.Repository.ProfileRepository;
 using DotNetBlazor.Server.Utility.Helpers;
 using DotNetBlazor.Shared.Models.Profile;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace DotNetBlazor.Server.Services.ProfileService
 {
@@ -18,7 +19,7 @@ namespace DotNetBlazor.Server.Services.ProfileService
             _profileRepository = profileRepository;
             _contextHelper = contextHelper;
         }
-        public async Task<UserDetailResponseData> UpdateUser(UserUpdateRequest request)
+        public async Task<UserDetailResponseData> UpdateProfile(UserUpdateRequest request)
         {
             var userRequest = new User
             {
@@ -32,7 +33,7 @@ namespace DotNetBlazor.Server.Services.ProfileService
                 UpdatedDate = DateTime.Now
             };
 
-            var user = await _profileRepository.UpdateUser(userRequest);
+            var user = await _profileRepository.UpdateProfile(userRequest);
             if (user == null)
             {
                 throw new ValidationException("Profile update failed!");
@@ -50,13 +51,13 @@ namespace DotNetBlazor.Server.Services.ProfileService
             };
         }
 
-        public async Task<UserDetailResponseData> UserDetail()
+        public async Task<UserDetailResponseData> GetProfile()
         {
             int id = _contextHelper.Id();
-            var user = await _profileRepository.UserDetail(id);
+            var user = await _profileRepository.GetProfile(id);
             if (user == null)
             {
-                throw new ValidationException("User not found!");
+                throw new ValidationException("Profile not found!");
             }
             return new UserDetailResponseData
             {
@@ -71,9 +72,29 @@ namespace DotNetBlazor.Server.Services.ProfileService
             };
         }
 
-        public Task<ChangePasswordResponseData> ChangePassword(ChangePasswordRequest request)
+        public async Task<ChangePasswordResponseData> ChangePassword(ChangePasswordRequest request)
         {
-            throw new NotImplementedException();
+            int id = _contextHelper.Id();
+            var user = await _profileRepository.GetProfile(id);
+            if (user == null)
+            {
+                throw new ValidationException("Profile not found!");
+            }
+            // Validate Password
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+            {
+                throw new ValidationException("Invalid Old Password!");
+            }
+            var userRequest = new UpdatePasswordRequest
+            {
+                UserId = id,
+                Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
+            };
+            var resp = await _profileRepository.UpdatePassword(userRequest);
+            return new ChangePasswordResponseData
+            {
+                IsSuccess = resp.IsSuccess
+            };
         }
     }
 }
