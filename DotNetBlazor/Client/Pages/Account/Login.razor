@@ -11,6 +11,8 @@
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
+<PageTitle>Login</PageTitle>
+
 <div class="container">
     <div class="row justify-content-center mt-5">
         <div class="col-md-6">
@@ -38,7 +40,7 @@
                         <button disabled="@loading" class="btn btn-primary">
                             @if (loading)
                             {
-                                <span class="spinner-border spinner-border-sm mr-1"></span>
+                                    <span class="spinner-border spinner-border-sm mr-1"></span>
                             }
                             Login
                         </button>

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetBlazor.Client", "DotN
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetBlazor.Shared", "DotNetBlazor\Shared\DotNetBlazor.Shared.csproj", "{117751FB-0EA3-4365-A745-E063B8E26D07}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetBlazor.Server.Test", "DotNetBlazor\Server.Test\DotNetBlazor.Server.Test.csproj", "{98112F8B-25EF-4BCC-BC9A-BC3EDEFA17F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{117751FB-0EA3-4365-A745-E063B8E26D07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{117751FB-0EA3-4365-A745-E063B8E26D07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{117751FB-0EA3-4365-A745-E063B8E26D07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98112F8B-25EF-4BCC-BC9A-BC3EDEFA17F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98112F8B-25EF-4BCC-BC9A-BC3EDEFA17F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98112F8B-25EF-4BCC-BC9A-BC3EDEFA17F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98112F8B-25EF-4BCC-BC9A-BC3EDEFA17F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

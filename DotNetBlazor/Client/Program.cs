@@ -1,6 +1,5 @@
 using DotNetBlazor.Client;
 using DotNetBlazor.Client.Services;
-using DotNetBlazor.Client.Shared;
 using DotNetBlazor.Client.Utility;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
