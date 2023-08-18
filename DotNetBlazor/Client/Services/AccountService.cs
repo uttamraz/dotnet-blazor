@@ -1,7 +1,6 @@
 ﻿using DotNetBlazor.Client.Utility;
 using DotNetBlazor.Shared.Models.Account;
 using DotNetBlazor.Shared.Models.Common;
-using Microsoft.AspNetCore.Components.Forms;
 using System.Net;
 
 namespace DotNetBlazor.Client.Services
@@ -14,6 +13,7 @@ namespace DotNetBlazor.Client.Services
         Task<RegistrationResponse> RegisterAsync(RegistrationRequest request);
 
         event Action<List<Error>> ValidationError;
+        event Action UnauthorizedPopup;
     }
 
     public class AccountService : IAccountService
@@ -21,12 +21,14 @@ namespace DotNetBlazor.Client.Services
         private readonly IApiHelper _apiHelper;
         private readonly ICacheHelper _cacheHelper;
         public event Action<List<Error>>? ValidationError;
+        public event Action UnauthorizedPopup;
 
         public AccountService(IApiHelper apiHelper, ICacheHelper cacheHelper)
         {
             _apiHelper = apiHelper;
             _cacheHelper = cacheHelper;
             _apiHelper.ValidationError += SetValidationError;
+            _apiHelper.UnauthorizedPopup += ActionUnauthorizedPopup;
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -56,10 +58,15 @@ namespace DotNetBlazor.Client.Services
         {
             ValidationError?.Invoke(list);
         }
+        private void ActionUnauthorizedPopup()
+        {
+            UnauthorizedPopup?.Invoke();
+        }
 
         public void Dispose()
         {
             _apiHelper.ValidationError -= SetValidationError;
+            _apiHelper.UnauthorizedPopup -= ActionUnauthorizedPopup;
         }
     }
 

@@ -19,22 +19,36 @@
             @Body
         </article>
     </main>
+    <UnauthorizedPopup IsPopupOpen="@UnauthorizedPopup" />
 </div>
 
 
 @code {
+    private bool UnauthorizedPopup = false;
+
     protected override async Task OnInitializedAsync()
     {
         if (!await AccountService.IsAuthenticated())
         {
-            NavigationManager.NavigateTo("/account/login?returnUrl=" + NavigationManager.Uri);
+            SetUnauthorizedPopup();
         }
+        AccountService.UnauthorizedPopup += SetUnauthorizedPopup;
     }
 
+    private void SetUnauthorizedPopup()
+    {
+        UnauthorizedPopup = true;
+    }
 
     private async Task Logout()
     {
         await AccountService.LogoutAsync();
         NavigationManager.NavigateTo("/account/login");
     }
+
+    public void Dispose()
+    {
+        AccountService.UnauthorizedPopup -= SetUnauthorizedPopup;
+    }
+
 }

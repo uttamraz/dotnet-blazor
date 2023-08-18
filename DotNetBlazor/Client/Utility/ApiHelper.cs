@@ -11,6 +11,7 @@ namespace DotNetBlazor.Client.Utility
     public interface IApiHelper
     {
         event Action<List<Error>> ValidationError;
+        event Action UnauthorizedPopup;
         Task<T> Get<T>(string url);
         Task<T> Post<T>(string url, object data);
     }
@@ -19,7 +20,9 @@ namespace DotNetBlazor.Client.Utility
     {
         private readonly HttpClient _httpClient;
         private readonly ICacheHelper _cacheHelper;
+
         public event Action<List<Error>>? ValidationError;
+        public event Action? UnauthorizedPopup;
 
         public ApiHelper(HttpClient httpClient, ICacheHelper cacheHelper)
         {
@@ -29,10 +32,14 @@ namespace DotNetBlazor.Client.Utility
 
         public async Task<T> Get<T>(string url)
         {
-            var request = await CreateRequestAsync(url, HttpMethod.Get);
+            var request = await CreateRequest(url, HttpMethod.Get);
             var response = await _httpClient.SendAsync(request);
-
-            if ((int)response.StatusCode == (int)HttpStatusCode.UnprocessableEntity)
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                UnauthorizedPopup?.Invoke();
+                return default(T);
+            }
+            else if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
                 var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
                 if (errorData?.Data?.Errors?.Count > 0)
@@ -49,10 +56,14 @@ namespace DotNetBlazor.Client.Utility
 
         public async Task<T> Post<T>(string url, object data)
         {
-            var request = await CreateRequestAsync(url, HttpMethod.Post, data);
+            var request = await CreateRequest(url, HttpMethod.Post, data);
             var response = await _httpClient.SendAsync(request);
-
-            if ((int)response.StatusCode == (int)HttpStatusCode.UnprocessableEntity)
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                UnauthorizedPopup?.Invoke();
+                return default(T);
+            }
+            else if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
                 var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
                 if (errorData?.Data?.Errors?.Count > 0)
@@ -68,7 +79,7 @@ namespace DotNetBlazor.Client.Utility
         }
 
 
-        private async Task<HttpRequestMessage> CreateRequestAsync(string url, HttpMethod method, object data = null)
+        private async Task<HttpRequestMessage> CreateRequest(string url, HttpMethod method, object data = null)
         {
             var request = new HttpRequestMessage(method, url);
 
