@@ -1,14 +1,16 @@
-﻿@page "/account/register"
+﻿@page "/register"
 @using DotNetBlazor.Client.Services;
 @using DotNetBlazor.Client.Utility;
 @using DotNetBlazor.Shared.Models.Account;
 @using System.Net;
 @using DotNetBlazor.Shared.Models.Common;
+@implements IDisposable
+
 @layout EmptyLayout
 @inject IAccountService AccountService
+@inject IEventHelper EventHelper
 @inject IAlertService AlertService
 @inject NavigationManager NavigationManager
-@implements IDisposable
 
 <PageTitle>Registration</PageTitle>
 
@@ -50,7 +52,7 @@
                             Register
                         </button>
 
-                        <NavLink href="account/login" class="btn btn-link">Already have an account?</NavLink>
+                        <NavLink href="/login" class="btn btn-link">Already have an account?</NavLink>
                     </EditForm>
                 </div>
             </div>
@@ -61,11 +63,11 @@
 @code {
     private RegistrationRequest model = new();
     private bool loading;
-    private ValidationHandler validationHandler;
+    private ValidationHandler? validationHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        AccountService.ValidationError += HandleValidationError;
+        EventHelper.ValidationError += HandleValidationError;
 
         if (await AccountService.IsAuthenticated())
         {
@@ -84,7 +86,7 @@
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
                 AlertService.Success("Registration Successful!", keepAfterRouteChange: true);
-                NavigationManager.NavigateTo("account/login");
+                NavigationManager.NavigateTo("/login");
             }
             else
             {
@@ -104,11 +106,11 @@
 
     private void HandleValidationError(List<Error> errors)
     {
-        validationHandler.DisplayErrors(errors);
+        validationHandler?.DisplayErrors(errors);
     }
 
     public void Dispose()
     {
-        AccountService.ValidationError -= HandleValidationError;
+        EventHelper.ValidationError -= HandleValidationError;
     }
 }

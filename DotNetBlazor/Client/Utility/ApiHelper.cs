@@ -11,7 +11,7 @@ namespace DotNetBlazor.Client.Utility
     public interface IApiHelper
     {
         event Action<List<Error>> ValidationError;
-        event Action UnauthorizedPopup;
+        event Action SessionExpired;
         Task<T> Get<T>(string url);
         Task<T> Post<T>(string url, object data);
     }
@@ -20,14 +20,16 @@ namespace DotNetBlazor.Client.Utility
     {
         private readonly HttpClient _httpClient;
         private readonly ICacheHelper _cacheHelper;
+        private readonly IEventHelper _eventHelper;
 
         public event Action<List<Error>>? ValidationError;
-        public event Action? UnauthorizedPopup;
+        public event Action? SessionExpired;
 
-        public ApiHelper(HttpClient httpClient, ICacheHelper cacheHelper)
+        public ApiHelper(HttpClient httpClient, ICacheHelper cacheHelper, IEventHelper eventHelper)
         {
             _httpClient = httpClient;
             _cacheHelper = cacheHelper;
+            _eventHelper = eventHelper;
         }
 
         public async Task<T> Get<T>(string url)
@@ -36,22 +38,21 @@ namespace DotNetBlazor.Client.Utility
             var response = await _httpClient.SendAsync(request);
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                UnauthorizedPopup?.Invoke();
-                return default(T);
+                _eventHelper.SessionExpiredPopup();
             }
             else if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
                 var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
                 if (errorData?.Data?.Errors?.Count > 0)
                 {
-                    ValidationError?.Invoke(errorData?.Data?.Errors);
+                    _eventHelper.SetValidationError(errorData?.Data?.Errors);
                 }
             }
             else
             {
                 return await response.Content.ReadFromJsonAsync<T>();
             }
-            return default(T);
+            return default;
         }
 
         public async Task<T> Post<T>(string url, object data)
@@ -60,22 +61,21 @@ namespace DotNetBlazor.Client.Utility
             var response = await _httpClient.SendAsync(request);
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                UnauthorizedPopup?.Invoke();
-                return default(T);
+                _eventHelper.SessionExpiredPopup();
             }
             else if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
                 var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
                 if (errorData?.Data?.Errors?.Count > 0)
                 {
-                    ValidationError?.Invoke(errorData?.Data?.Errors);
+                    _eventHelper.SetValidationError(errorData?.Data?.Errors);
                 }
             }
             else
             {
                 return await response.Content.ReadFromJsonAsync<T>();
             }
-            return default(T);
+            return default;
         }
 
 

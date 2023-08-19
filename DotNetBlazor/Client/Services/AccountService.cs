@@ -5,30 +5,23 @@ using System.Net;
 
 namespace DotNetBlazor.Client.Services
 {
-    public interface IAccountService : IDisposable
+    public interface IAccountService
     {
         Task<LoginResponse> LoginAsync(LoginRequest request);
         Task LogoutAsync();
         public Task<bool> IsAuthenticated();
         Task<RegistrationResponse> RegisterAsync(RegistrationRequest request);
-
-        event Action<List<Error>> ValidationError;
-        event Action UnauthorizedPopup;
     }
 
     public class AccountService : IAccountService
     {
         private readonly IApiHelper _apiHelper;
         private readonly ICacheHelper _cacheHelper;
-        public event Action<List<Error>>? ValidationError;
-        public event Action UnauthorizedPopup;
 
         public AccountService(IApiHelper apiHelper, ICacheHelper cacheHelper)
         {
             _apiHelper = apiHelper;
             _cacheHelper = cacheHelper;
-            _apiHelper.ValidationError += SetValidationError;
-            _apiHelper.UnauthorizedPopup += ActionUnauthorizedPopup;
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -53,20 +46,6 @@ namespace DotNetBlazor.Client.Services
         public async Task<bool> IsAuthenticated()
         {
             return !string.IsNullOrWhiteSpace(await _cacheHelper.GetTokenAsync());
-        }
-        private void SetValidationError(List<Error> list)
-        {
-            ValidationError?.Invoke(list);
-        }
-        private void ActionUnauthorizedPopup()
-        {
-            UnauthorizedPopup?.Invoke();
-        }
-
-        public void Dispose()
-        {
-            _apiHelper.ValidationError -= SetValidationError;
-            _apiHelper.UnauthorizedPopup -= ActionUnauthorizedPopup;
         }
     }
 

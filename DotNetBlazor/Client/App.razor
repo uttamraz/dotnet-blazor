@@ -1,4 +1,7 @@
-﻿@using DotNetBlazor.Client.Services;
+﻿@using DotNetBlazor.Client.Components
+@using DotNetBlazor.Client.Services;
+@inject IAlertService AlertService;
+
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
@@ -17,10 +20,7 @@
 </ErrorBoundary>
 
 @code {
-    [Inject]
-    private IAlertService AlertService { get; set; }
-
-    private string errorMessage;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {

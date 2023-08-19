@@ -12,10 +12,17 @@ Welcome to your new app.
 
 
 @code {
-    private UserDetailResponse response;
+    private UserDetailResponse? response;
 
     protected override async Task OnInitializedAsync()
     {
-        response = await ProfileService.GetProfile();
+        try
+        {
+            response = await ProfileService.GetProfile();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }

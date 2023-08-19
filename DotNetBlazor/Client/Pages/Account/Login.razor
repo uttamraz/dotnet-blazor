@@ -1,15 +1,16 @@
-﻿@page "/account/login"
+﻿@page "/login"
 @layout EmptyLayout
 @using DotNetBlazor.Client.Services;
 @using DotNetBlazor.Client.Utility;
 @using DotNetBlazor.Shared.Models.Account;
 @using System.Net;
 @using DotNetBlazor.Shared.Models.Common;
+@implements IDisposable
 
 @inject IAccountService AccountService
+@inject IEventHelper EventHelper
 @inject IAlertService AlertService
 @inject NavigationManager NavigationManager
-@implements IDisposable
 
 <PageTitle>Login</PageTitle>
 
@@ -40,12 +41,12 @@
                         <button disabled="@loading" class="btn btn-primary">
                             @if (loading)
                             {
-                                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                                <span class="spinner-border spinner-border-sm mr-1"></span>
                             }
                             Login
                         </button>
 
-                        <NavLink href="account/register" class="btn btn-link">Don't have an account?</NavLink>
+                        <NavLink href="/register" class="btn btn-link">Don't have an account?</NavLink>
                     </EditForm>
                 </div>
             </div>
@@ -58,12 +59,12 @@
     private bool loading;
 
     [SupplyParameterFromQuery]
-    public string ReturnUrl { get; set; }
-    private ValidationHandler validationHandler;
+    public string? ReturnUrl { get; set; }
+    private ValidationHandler? validationHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        AccountService.ValidationError += HandleValidationError;
+        EventHelper.ValidationError += HandleValidationError;
         if (await AccountService.IsAuthenticated())
         {
             NavigationManager.NavigateTo("/");
@@ -100,11 +101,11 @@
 
     private void HandleValidationError(List<Error> errors)
     {
-        validationHandler.DisplayErrors(errors);
+        validationHandler?.DisplayErrors(errors);
     }
 
     public void Dispose()
     {
-        AccountService.ValidationError -= HandleValidationError;
+        EventHelper.ValidationError -= HandleValidationError;
     }
 }
