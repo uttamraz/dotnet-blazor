@@ -1,27 +1,29 @@
-﻿@using DotNetBlazor.Client.Services;
-@using DotNetBlazor.Client.Utility;
+﻿@using DotNetBlazor.Client.Utility;
 @implements IDisposable
 @inject NavigationManager NavigationManager
 @inject IEventHelper EventHelper
 
-<div class="modal fade @(IsPopupOpen ? "show" : "") d-block" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Session Expired</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="ClosePopup">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Your session has expired. Please log in again to continue.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="RedirectToLogin">Go to Login</button>
+@if (IsPopupOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Session Expired</h5>
+                    <button type="button" class="btn btn-default close" data-dismiss="modal" aria-label="Close" @onclick="ClosePopup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Your session has expired. Please log in again to continue.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="RedirectToLogin">Go to Login</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
 
 @code {
     private bool IsPopupOpen { get; set; } = false;
@@ -34,16 +36,19 @@
     public void OpenPopup()
     {
         IsPopupOpen = true;
+        StateHasChanged();
     }
 
     public void ClosePopup()
     {
         IsPopupOpen = false;
+        StateHasChanged();
     }
 
     private void RedirectToLogin()
     {
-        NavigationManager.NavigateTo("/account/login?returnUrl=" + Uri.EscapeDataString(NavigationManager.Uri));
+        ClosePopup();
+        NavigationManager.NavigateTo("/login?returnUrl=" + Uri.EscapeDataString(NavigationManager.Uri));
     }
 
     public void Dispose()

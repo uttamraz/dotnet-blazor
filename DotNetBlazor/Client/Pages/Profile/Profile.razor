@@ -1,0 +1,166 @@
+﻿@page "/profile"
+@using DotNetBlazor.Client.Components
+@using DotNetBlazor.Client.Services
+@using DotNetBlazor.Shared.Models.Profile
+@using System.Net
+@inject IProfieService ProfileService
+@inject IAlertService AlertService
+
+<PageTitle>Profile</PageTitle>
+
+    <div class="container">
+        <div class="main-body">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex flex-column align-items-center text-center">
+                                <img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="Profile" class="rounded-circle p-1 bg-primary" width="110">
+                                <div class="mt-3">
+                                    <h4>@model.FullName</h4>
+                                    <p class="text-muted font-size-sm">@model.CurrentAddress</p>
+                                    <button class="btn btn-primary">Follow</button>
+                                    <button class="btn btn-outline-primary">Message</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <EditForm Model="@model" OnValidSubmit="OnValidSubmit">        
+                                <ValidationError />
+                                <DataAnnotationsValidator />
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Full Name</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <InputText class="form-control" @bind-Value="model.FullName" />
+                                        <ValidationMessage For="@(() => model.FullName)" />
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Email</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <InputText class="form-control" @bind-Value="model.Email" />
+                                        <ValidationMessage For="@(() => model.Email)" />
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Mobile</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <InputText class="form-control" @bind-Value="model.Mobile" />
+                                        <ValidationMessage For="@(() => model.Mobile)" />
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Address</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <InputText class="form-control" @bind-Value="model.CurrentAddress" />
+                                        <ValidationMessage For="@(() => model.CurrentAddress)" />
+                                    </div>
+                                </div>
+
+                               <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Gender</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <select class="form-control" @bind="@model.Gender">
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <ValidationMessage For="@(() => model.Gender)" />
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-sm-3"></div>
+                                    <div class="col-sm-9 text-secondary">                                        
+                                        <button disabled="@loading" class="btn btn-primary">
+                                            @if (loading)
+                                            {
+                                                <span class="spinner-border spinner-border-sm mr-1"></span>
+                                            }
+                                            Update Profile
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@code {
+    private UserDetail model = new();
+    private bool loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await ProfileService.GetProfile();
+            if(response?.Response?.Status == (int) HttpStatusCode.OK) {
+                model = response.Data;
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        AlertService.Clear();
+
+        loading = true;
+        try
+        {
+            var response = await ProfileService.UpdateProfile(new UserUpdateRequest
+            {
+                FullName = model.FullName,
+                Mobile = model.Mobile,
+                Gender = model.Gender,
+                DateOfBirth = model.DateOfBirth,
+                CurrentAddress = model.CurrentAddress,
+                DocumentUrl = model.DocumentUrl
+            });
+
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
+            {
+                AlertService.Success("Profile updated successfully!");
+            }
+            else
+            {
+                AlertService.Error(response?.Response?.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

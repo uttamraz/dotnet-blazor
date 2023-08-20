@@ -1,0 +1,36 @@
+﻿@using DotNetBlazor.Client.Services;
+@inject IAccountService AccountService
+@inject NavigationManager NavigationManager
+
+<div class="dropdown ml-auto">
+    <a class="nav-link dropdown-toggle" href="#" role="button" @onclick="ToggleDropdown">
+        <span class="oi oi-person" aria-hidden="true"></span>
+    </a>
+    <div class="dropdown-menu" style="display: @(showDropdown ? "block" : "none")">
+        <a class="dropdown-item" href="/profile">
+            <span class="oi oi-person" aria-hidden="true"></span> Profile
+        </a>
+        <a class="dropdown-item" href="/change-password">
+            <span class="oi oi-lock-locked" aria-hidden="true"></span> Change Password
+        </a>
+        <a class="dropdown-item" href="#" onclick="Logout">
+            <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
+        </a>
+    </div>
+</div>
+
+
+@code {
+    private bool showDropdown = false;
+
+    private void ToggleDropdown()
+    {
+        showDropdown = !showDropdown;
+    }
+
+    private async Task Logout()
+    {
+        await AccountService.LogoutAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+}

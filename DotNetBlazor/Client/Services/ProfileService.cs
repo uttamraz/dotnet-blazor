@@ -1,5 +1,4 @@
 ﻿using DotNetBlazor.Client.Utility;
-using DotNetBlazor.Shared.Models.Common;
 using DotNetBlazor.Shared.Models.Profile;
 
 namespace DotNetBlazor.Client.Services
@@ -15,10 +14,12 @@ namespace DotNetBlazor.Client.Services
     public class ProfileService : IProfieService
     {
         private readonly IApiHelper _apiHelper;
+        private readonly IEventHelper _eventHelper;
 
-        public ProfileService(IApiHelper apiHelper)
+        public ProfileService(IApiHelper apiHelper, IEventHelper eventHelper)
         {
             _apiHelper = apiHelper;
+            _eventHelper = eventHelper;
         }
 
         public async Task<UserDetailResponse> UpdateProfile(UserUpdateRequest request)
@@ -28,12 +29,14 @@ namespace DotNetBlazor.Client.Services
 
         public async Task<UserDetailResponse> GetProfile()
         {
-            return await _apiHelper.Get<UserDetailResponse>("api/v1/profile/GetProfile");
+            var user = await _apiHelper.Get<UserDetailResponse>("api/v1/profile/GetProfile");
+            _eventHelper.SetProfileProgress(user.Data);
+            return user;
         }
 
         public async Task<ChangePasswordResponse> ChangePassword(ChangePasswordRequest request)
         {
-            return await _apiHelper.Get<ChangePasswordResponse>("api/v1/profile/ChangePassword");
+            return await _apiHelper.Post<ChangePasswordResponse>("api/v1/profile/ChangePassword", request);
         }
     }
 }

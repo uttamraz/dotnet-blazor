@@ -10,8 +10,6 @@ namespace DotNetBlazor.Client.Utility
 
     public interface IApiHelper
     {
-        event Action<List<Error>> ValidationError;
-        event Action SessionExpired;
         Task<T> Get<T>(string url);
         Task<T> Post<T>(string url, object data);
     }
@@ -22,9 +20,6 @@ namespace DotNetBlazor.Client.Utility
         private readonly ICacheHelper _cacheHelper;
         private readonly IEventHelper _eventHelper;
 
-        public event Action<List<Error>>? ValidationError;
-        public event Action? SessionExpired;
-
         public ApiHelper(HttpClient httpClient, ICacheHelper cacheHelper, IEventHelper eventHelper)
         {
             _httpClient = httpClient;
@@ -34,52 +29,51 @@ namespace DotNetBlazor.Client.Utility
 
         public async Task<T> Get<T>(string url)
         {
-            var request = await CreateRequest(url, HttpMethod.Get);
-            var response = await _httpClient.SendAsync(request);
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _eventHelper.SessionExpiredPopup();
-            }
-            else if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
-            {
-                var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
-                if (errorData?.Data?.Errors?.Count > 0)
-                {
-                    _eventHelper.SetValidationError(errorData?.Data?.Errors);
-                }
-            }
-            else
-            {
-                return await response.Content.ReadFromJsonAsync<T>();
-            }
-            return default;
+            return await Send<T>(url, HttpMethod.Get);
         }
 
         public async Task<T> Post<T>(string url, object data)
         {
-            var request = await CreateRequest(url, HttpMethod.Post, data);
-            var response = await _httpClient.SendAsync(request);
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _eventHelper.SessionExpiredPopup();
-            }
-            else if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
-            {
-                var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
-                if (errorData?.Data?.Errors?.Count > 0)
-                {
-                    _eventHelper.SetValidationError(errorData?.Data?.Errors);
-                }
-            }
-            else
-            {
-                return await response.Content.ReadFromJsonAsync<T>();
-            }
-            return default;
+            return await Send<T>(url, HttpMethod.Post, data);
         }
 
+        private async Task<T> Send<T>(string url, HttpMethod method, object? data = null)
+        {
+            try
+            {
+                _eventHelper.SetLoadingState(true);
+                var request = await CreateRequest(url, method, data);
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    await _cacheHelper.RemoveTokenAsync();
+                    _eventHelper.HandleSessionExpire();
+                }
+                else if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
+                {
+                    var errorData = await response.Content.ReadFromJsonAsync<ValidationErrorResposne>();
+                    if (errorData?.Data?.Errors?.Count > 0)
+                    {
+                        _eventHelper.SetValidationError(errorData?.Data?.Errors);
+                    }
+                }
+                else
+                {
+                    return await response.Content.ReadFromJsonAsync<T>();
+                }
+                return default;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                _eventHelper.SetLoadingState(false);
+            }
+        }
 
-        private async Task<HttpRequestMessage> CreateRequest(string url, HttpMethod method, object data = null)
+        private async Task<HttpRequestMessage> CreateRequest(string url, HttpMethod method, object? data = null)
         {
             var request = new HttpRequestMessage(method, url);
 

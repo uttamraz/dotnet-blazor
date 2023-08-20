@@ -1,14 +1,13 @@
 ﻿@page "/register"
+@using DotNetBlazor.Client.Components
 @using DotNetBlazor.Client.Services;
 @using DotNetBlazor.Client.Utility;
 @using DotNetBlazor.Shared.Models.Account;
 @using System.Net;
 @using DotNetBlazor.Shared.Models.Common;
-@implements IDisposable
 
 @layout EmptyLayout
 @inject IAccountService AccountService
-@inject IEventHelper EventHelper
 @inject IAlertService AlertService
 @inject NavigationManager NavigationManager
 
@@ -23,13 +22,19 @@
                 </div>
                 <div class="card-body">
                     <EditForm Model="model" OnValidSubmit="OnValidSubmit">
-                        <ValidationHandler @ref="validationHandler" />
+                        <ValidationError />
                         <DataAnnotationsValidator />
 
                         <div class="mb-3">
                             <label for="fullName" class="form-label">Full Name</label>
                             <InputText id="fullName" @bind-Value="model.FullName" class="form-control" autocomplete="off" />
                             <ValidationMessage For="@(() => model.FullName)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Mobile</label>
+                            <InputText id="email" @bind-Value="model.Mobile" class="form-control" autocomplete="off" />
+                            <ValidationMessage For="@(() => model.Mobile)" />
                         </div>
 
                         <div class="mb-3">
@@ -63,12 +68,9 @@
 @code {
     private RegistrationRequest model = new();
     private bool loading;
-    private ValidationHandler? validationHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        EventHelper.ValidationError += HandleValidationError;
-
         if (await AccountService.IsAuthenticated())
         {
             NavigationManager.NavigateTo("/");
@@ -91,26 +93,17 @@
             else
             {
                 AlertService.Error(response?.Response?.Message);
-                loading = false;
-                StateHasChanged();
             }
         }
         catch (Exception ex)
         {
             AlertService.Error(ex.Message);
+        }
+        finally
+        {
             loading = false;
             StateHasChanged();
         }
 
-    }
-
-    private void HandleValidationError(List<Error> errors)
-    {
-        validationHandler?.DisplayErrors(errors);
-    }
-
-    public void Dispose()
-    {
-        EventHelper.ValidationError -= HandleValidationError;
     }
 }

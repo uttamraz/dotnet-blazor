@@ -1,0 +1,31 @@
+﻿@using DotNetBlazor.Client.Utility;
+@implements IDisposable
+@inject IEventHelper EventHelper
+
+
+@if (IsLoading)
+{
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+}
+
+@code {
+    private bool IsLoading = false;
+
+    protected override void OnInitialized()
+    {
+        EventHelper.LoadingState += HandleLoader;
+    }
+
+    public void HandleLoader(bool state)
+    {
+        IsLoading = state;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        EventHelper.LoadingState -= HandleLoader;
+    }
+}

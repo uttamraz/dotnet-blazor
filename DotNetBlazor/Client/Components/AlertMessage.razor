@@ -4,10 +4,10 @@
 @inject IAlertService AlertService
 @inject NavigationManager NavigationManager
 
+<div class="alert-container position-fixed top-0 end-0 m-2" style="z-index:1050;">
 @foreach (var alert in alerts)
 {
-    <div class="col-lg-3 col-md-4 m-auto">
-        <div class="@CssClass(alert) position-absolute top-0 end-0" style="z-index: 1050;">
+        <div class="alert @CssClass(alert)" >
             <div class="row align-items-center">
                 <div class="col-auto">
                     @if (alert.Type == AlertType.Error)
@@ -43,8 +43,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @onclick="@(() => RemoveAlert(alert))"></button>
             </div>
         </div>
-    </div>
 }
+</div>
 
 @code {
     [Parameter]
@@ -84,7 +84,7 @@
 
             if (alert.AutoClose)
             {
-                await Task.Delay(10000);
+                await Task.Delay(100000);
                 RemoveAlert(alert);
             }
         }
@@ -120,7 +120,7 @@
     {
         if (alert == null) return null;
 
-        var classes = new List<string> { "alert", "alert-dismissable", "mt-4", "container" };
+        var classes = new List<string> { };
 
         var alertTypeClass = new Dictionary<AlertType, string>();
         alertTypeClass[AlertType.Success] = "alert-success";

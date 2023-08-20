@@ -1,43 +1,41 @@
-﻿@using DotNetBlazor.Client.Components
+﻿@using DotNetBlazor.Client.Components;
 @using DotNetBlazor.Client.Services;
 @inherits LayoutComponentBase
 
 @inject NavigationManager NavigationManager
 @inject IAccountService AccountService
 
+<ShowLoader />
 <div class="page">
-
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
         <div class="top-row px-4">
-            <NavLink href="#" @onclick="Logout">Logout</NavLink>
+            <button class="btn btn-default" @onclick="Logout">
+                <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
+            </button>        
         </div>
-
         <article class="content px-4">
             @Body
         </article>
+        <SessionExpired />
     </main>
 </div>
 
 
 @code {
-    private SessionExpired? sessionExpired;
-
     protected override async Task OnInitializedAsync()
     {
         if (!await AccountService.IsAuthenticated())
         {
-            sessionExpired?.OpenPopup();
+            NavigationManager.NavigateTo("/login");
         }
     }
-
     private async Task Logout()
     {
-        await AccountService.LogoutAsync();
+        await AccountService.LogoutAsync(); 
         NavigationManager.NavigateTo("/login");
     }
-
 }

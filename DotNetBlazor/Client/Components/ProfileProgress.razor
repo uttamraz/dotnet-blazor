@@ -1,0 +1,66 @@
+﻿@using DotNetBlazor.Client.Utility;
+@using DotNetBlazor.Shared.Models.Profile;
+@implements IDisposable
+@inject IEventHelper EventHelper
+@inject NavigationManager NavigationManager
+
+<div class="profile-progress">
+    @if (progress < 100)
+    {
+        <div class="row align-items-center">
+            <div class="col-6 pr-0">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: @progress%;" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100">@progress%</div>
+                </div>
+            </div>
+            <span>Complete Profile</span> 
+        </div>
+    }
+    else
+    {
+        <div class="row align-items-center">
+            <div class="col-6 pr-0">
+                <div class="d-flex align-items-center justify-content-center rounded-circle bg-success text-white" style="width: 40px; height: 40px;">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <div class="col-6 pl-0">
+                <p class="mt-2">Completed</p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private int progress { get; set; } = 0;
+
+    protected override void OnInitialized() => EventHelper.ProfileProgress += SetProgress;
+
+    public void SetProgress(UserDetail user)
+    {
+        int totalProperties = typeof(UserDetail).GetProperties().Length;
+        int nullPropertyCount = 0;
+
+        foreach (var property in typeof(UserDetail).GetProperties())
+        {
+            var value = property.GetValue(user);
+            if (value == null)
+            {
+                nullPropertyCount++;
+            }
+        }
+
+        progress = (int)(((totalProperties - nullPropertyCount) / (float)totalProperties) * 100);
+        StateHasChanged();
+    }
+
+    public void CompleteProfile()
+    {
+        NavigationManager.NavigateTo("/profile");
+    }
+
+    public void Dispose()
+    {
+        EventHelper.ProfileProgress -= SetProgress;
+    }
+}

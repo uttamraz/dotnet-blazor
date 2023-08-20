@@ -1,14 +1,13 @@
 ﻿@page "/login"
 @layout EmptyLayout
+@using DotNetBlazor.Client.Components
 @using DotNetBlazor.Client.Services;
 @using DotNetBlazor.Client.Utility;
 @using DotNetBlazor.Shared.Models.Account;
 @using System.Net;
 @using DotNetBlazor.Shared.Models.Common;
-@implements IDisposable
 
 @inject IAccountService AccountService
-@inject IEventHelper EventHelper
 @inject IAlertService AlertService
 @inject NavigationManager NavigationManager
 
@@ -23,11 +22,11 @@
                 </div>
                 <div class="card-body">
                     <EditForm Model="model" OnValidSubmit="OnValidSubmit">
-                        <ValidationHandler @ref="validationHandler" />
+                        <ValidationError />
                         <DataAnnotationsValidator />
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Username</label>
+                            <label for="email" class="form-label">Email</label>
                             <InputText id="email" @bind-Value="model.Email" class="form-control" />
                             <ValidationMessage For="@(() => model.Email)" />
                         </div>
@@ -60,11 +59,9 @@
 
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
-    private ValidationHandler? validationHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        EventHelper.ValidationError += HandleValidationError;
         if (await AccountService.IsAuthenticated())
         {
             NavigationManager.NavigateTo("/");
@@ -86,26 +83,16 @@
             else
             {
                 AlertService.Error(response?.Response?.Message);
-                loading = false;
-                StateHasChanged();
             }
         }
         catch (Exception ex)
         {
             AlertService.Error(ex.Message);
+        }
+        finally
+        {
             loading = false;
             StateHasChanged();
         }
-    }
-
-
-    private void HandleValidationError(List<Error> errors)
-    {
-        validationHandler?.DisplayErrors(errors);
-    }
-
-    public void Dispose()
-    {
-        EventHelper.ValidationError -= HandleValidationError;
     }
 }
