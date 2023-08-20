@@ -12,10 +12,11 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
+         <div class="top-row px-4 d-flex align-items-center">
+            <h3 class="page-title flex-grow-1">@pageTitle</h3>
             <button class="btn btn-default" @onclick="Logout">
                 <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
-            </button>        
+            </button>
         </div>
         <article class="content px-4">
             @Body
@@ -26,6 +27,12 @@
 
 
 @code {
+
+    private string pageTitle = "Dashboard"; 
+    public void SetPageTitle(string title)
+    {
+        pageTitle = title;
+    }
     protected override async Task OnInitializedAsync()
     {
         if (!await AccountService.IsAuthenticated())

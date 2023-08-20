@@ -24,6 +24,8 @@ namespace DotNetBlazor.Server.Services.ProfileService
             var userRequest = new User
             {
                 Id = _contextHelper.Id(),
+                FullName = request.FullName,
+                Mobile = request.Mobile,
                 Gender = request.Gender,
                 DateOfBirth = request.DateOfBirth,
                 CurrentAddress = request.CurrentAddress,

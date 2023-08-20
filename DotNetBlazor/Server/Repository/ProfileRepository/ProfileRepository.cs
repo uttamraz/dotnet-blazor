@@ -18,6 +18,8 @@ namespace DotNetBlazor.Server.Repository.ProfileRepository
             var data = await context.Users.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (data != null)
             {
+                data.FullName = request.FullName;
+                data.Mobile = request.Mobile;
                 data.Gender = request.Gender;
                 data.DateOfBirth = request.DateOfBirth;
                 data.CurrentAddress = request.CurrentAddress;

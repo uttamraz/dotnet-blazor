@@ -30,7 +30,8 @@ namespace DotNetBlazor.Client.Services
         public async Task<UserDetailResponse> GetProfile()
         {
             var user = await _apiHelper.Get<UserDetailResponse>("api/v1/profile/GetProfile");
-            _eventHelper.SetProfileProgress(user.Data);
+            if (user != null)
+                _eventHelper.SetProfileProgress(user.Data);
             return user;
         }
 
