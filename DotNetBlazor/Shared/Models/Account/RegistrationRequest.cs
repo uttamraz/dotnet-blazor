@@ -7,6 +7,8 @@ namespace DotNetBlazor.Shared.Models.Account
     {
         [Required, DisplayName("Full Name"), MaxLength(15), MinLength(6)]
         public string FullName { get; set; } = null!;
+        [Required, MaxLength(20), MinLength(8)]
+        public string Mobile { get; set; } = null!;
         [Required, EmailAddress]
         public string Email { get; set; } = null!;
         [Required, MaxLength(32), MinLength(6)]

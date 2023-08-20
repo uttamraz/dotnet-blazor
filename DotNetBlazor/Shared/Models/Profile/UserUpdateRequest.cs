@@ -1,10 +1,13 @@
-﻿namespace DotNetBlazor.Shared.Models.Profile
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DotNetBlazor.Shared.Models.Profile
 {
     public class UserUpdateRequest
     {
-        public string Id { get; set; } = null!;
-        public string? FullName { get; set; }
-        public string? Mobile { get; set; }
+        [MaxLength(100), MinLength(2)]
+        public string FullName { get; set; } = null!;
+        [MaxLength(20), MinLength(8)]
+        public string Mobile { get; set; } = null!;
         public string? Gender { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string? CurrentAddress { get; set; }

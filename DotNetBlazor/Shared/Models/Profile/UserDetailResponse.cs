@@ -4,15 +4,14 @@ namespace DotNetBlazor.Shared.Models.Profile
 {
     public class UserDetailResponse
     {
-        public UserDetailResponseData Data { get; set; }
+        public UserDetail Data { get; set; }
         public Response Response { get; set; }
     }
 
-    public class UserDetailResponseData
+    public class UserDetail
     {
-        public int Id { get; set; }
         public string Email { get; set; } = null!;
-        public string? FullName { get; set; }
+        public string FullName { get; set; } = null!;
         public string? Mobile { get; set; }
         public string? Gender { get; set; }
         public DateTime? DateOfBirth { get; set; }

@@ -2,10 +2,10 @@
 {
     public class CommonResponse
     {
-        public object Data { get; set; }
+        public object? Data { get; set; }
         public Response Response { get; set; }
 
-        public CommonResponse(object data, int status, string message)
+        public CommonResponse(object? data, int status, string message)
         {
             Data = data;
             Response = new Response
@@ -18,8 +18,8 @@
 
     public class ValidationErrorResposne
     {
-        public ErrorList Data { get; set; }
-        public Response Response { get; set; }
+        public ErrorList? Data { get; set; }
+        public Response? Response { get; set; }
     }
 
     public class ErrorList
