@@ -18,8 +18,6 @@ namespace DotNetBlazor.Server.Repository.ProfileRepository
             var data = await context.Users.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (data != null)
             {
-                data.Mobile = request.Mobile;
-                data.FullName = request.FullName;
                 data.Gender = request.Gender;
                 data.DateOfBirth = request.DateOfBirth;
                 data.CurrentAddress = request.CurrentAddress;
@@ -41,11 +39,11 @@ namespace DotNetBlazor.Server.Repository.ProfileRepository
             return request;
         }
 
-        public async Task<User> GetProfile(int id)
+        public async Task<User?> GetProfile(int id)
         {
             return await context.Users.FirstOrDefaultAsync(x => x.Id == id);
         }
-        public async Task<User> UserDetail(string email)
+        public async Task<User?> UserDetail(string email)
         {
             return await context.Users.FirstOrDefaultAsync(x => x.Email == email);
         }

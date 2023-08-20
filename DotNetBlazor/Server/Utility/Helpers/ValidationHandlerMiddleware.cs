@@ -34,7 +34,7 @@ namespace DotNetBlazor.Server.Utility.Helpers
         public string Message { get; }
         public ValidationError(string field, string message)
         {
-            Field = field != string.Empty ? field : null;
+            Field = field;
             Message = message;
         }
     }

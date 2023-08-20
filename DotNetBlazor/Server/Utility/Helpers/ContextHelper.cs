@@ -4,11 +4,11 @@
     public interface IContextHelper
     {
         public int Id();
-        public string Token();
-        public string Username();
-        public string Email();
-        public string DebugId();
-        public IHeaderDictionary Headers();
+        public string? Token();
+        public string? Username();
+        public string? Email();
+        public string? DebugId();
+        public IHeaderDictionary? Headers();
     }
 
     public class ContextHelper : IContextHelper
@@ -21,34 +21,34 @@
         }
         public int Id()
         {
-            return Convert.ToInt32(context.HttpContext.Request.Headers["Id"]);
+            return Convert.ToInt32(context?.HttpContext?.Request.Headers["Id"]);
         }
-        public string Token()
+        public string? Token()
         {
-            string auth = context.HttpContext.Request.Headers["Authorization"];
+            string? auth = context?.HttpContext?.Request.Headers["Authorization"];
             if (auth != null && auth.StartsWith("Bearer"))
             {
                 return auth.Substring("Bearer ".Length).Trim();
             }
             return null;
         }
-        public string Username()
+        public string? Username()
         {
-            return context.HttpContext.Request.Headers["Username"];
+            return context?.HttpContext?.Request.Headers["Username"];
         }
 
-        public string Email()
+        public string? Email()
         {
-            return context.HttpContext.Request.Headers["Email"];
+            return context?.HttpContext?.Request.Headers["Email"];
         }
-        public string DebugId()
+        public string? DebugId()
         {
-            return context.HttpContext.Request.Headers["DebugId"];
+            return context?.HttpContext?.Request.Headers["DebugId"];
         }
 
-        public IHeaderDictionary Headers()
+        public IHeaderDictionary? Headers()
         {
-            return context.HttpContext.Request.Headers;
+            return context?.HttpContext?.Request.Headers;
         }
     }
 }

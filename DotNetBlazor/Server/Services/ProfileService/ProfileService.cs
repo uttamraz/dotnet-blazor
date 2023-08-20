@@ -19,13 +19,11 @@ namespace DotNetBlazor.Server.Services.ProfileService
             _profileRepository = profileRepository;
             _contextHelper = contextHelper;
         }
-        public async Task<UserDetailResponseData> UpdateProfile(UserUpdateRequest request)
+        public async Task<UserDetail> UpdateProfile(UserUpdateRequest request)
         {
             var userRequest = new User
             {
                 Id = _contextHelper.Id(),
-                FullName = request.FullName,
-                Mobile = request.Mobile,
                 Gender = request.Gender,
                 DateOfBirth = request.DateOfBirth,
                 CurrentAddress = request.CurrentAddress,
@@ -33,14 +31,9 @@ namespace DotNetBlazor.Server.Services.ProfileService
                 UpdatedDate = DateTime.Now
             };
 
-            var user = await _profileRepository.UpdateProfile(userRequest);
-            if (user == null)
+            var user = await _profileRepository.UpdateProfile(userRequest) ?? throw new ValidationException("Profile update failed!");
+            return new UserDetail
             {
-                throw new ValidationException("Profile update failed!");
-            }
-            return new UserDetailResponseData
-            {
-                Id = user.Id,
                 Email = user.Email,
                 FullName = user.FullName,
                 Mobile = user.Mobile,
@@ -51,17 +44,12 @@ namespace DotNetBlazor.Server.Services.ProfileService
             };
         }
 
-        public async Task<UserDetailResponseData> GetProfile()
+        public async Task<UserDetail> GetProfile()
         {
             int id = _contextHelper.Id();
-            var user = await _profileRepository.GetProfile(id);
-            if (user == null)
+            var user = await _profileRepository.GetProfile(id) ?? throw new ValidationException("Profile not found!");
+            return new UserDetail
             {
-                throw new ValidationException("Profile not found!");
-            }
-            return new UserDetailResponseData
-            {
-                Id = user.Id,
                 Email = user.Email,
                 FullName = user.FullName,
                 Mobile = user.Mobile,
@@ -75,11 +63,7 @@ namespace DotNetBlazor.Server.Services.ProfileService
         public async Task<ChangePasswordResponseData> ChangePassword(ChangePasswordRequest request)
         {
             int id = _contextHelper.Id();
-            var user = await _profileRepository.GetProfile(id);
-            if (user == null)
-            {
-                throw new ValidationException("Profile not found!");
-            }
+            var user = await _profileRepository.GetProfile(id) ?? throw new ValidationException("Profile not found!");
             // Validate Password
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
@@ -88,7 +72,7 @@ namespace DotNetBlazor.Server.Services.ProfileService
             var userRequest = new UpdatePasswordRequest
             {
                 UserId = id,
-                Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword)
             };
             var resp = await _profileRepository.UpdatePassword(userRequest);
             return new ChangePasswordResponseData

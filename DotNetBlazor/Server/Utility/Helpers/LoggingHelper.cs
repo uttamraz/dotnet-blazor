@@ -6,7 +6,7 @@ namespace DotNetBlazor.Server.Utility.Helpers
 {
     public static class LoggingHelper
     {
-        private static readonly string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        private static readonly string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? throw new Exception("ASPNETCORE_ENVIRONMENT is not configured");
         public static void InitLog(this WebApplicationBuilder builder)
         {
             List<string> maskingProp = new()
@@ -36,7 +36,8 @@ namespace DotNetBlazor.Server.Utility.Helpers
 
         private static ElasticsearchSinkOptions ConfigureElasticSink(IConfigurationRoot configuration, string environment)
         {
-            return new ElasticsearchSinkOptions(new Uri(configuration["ElasticUrl"]))
+            var url = configuration["ElasticUrl"]??throw new Exception("ElasticUrl is not configured");
+            return new ElasticsearchSinkOptions(new Uri(url))
             {
                 AutoRegisterTemplate = true,
                 IndexFormat = $"log-{DateTime.UtcNow:yyyy-mm-dd}"

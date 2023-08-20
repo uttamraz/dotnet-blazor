@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DotNetBlazor.Server.Migrations
 {
     [DbContext(typeof(BaseDbContext))]
-    [Migration("20230816122255_MobileFieldToOptional")]
-    partial class MobileFieldToOptional
+    [Migration("20230819142640_InitialMigrations")]
+    partial class InitialMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,6 +46,7 @@ namespace DotNetBlazor.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
@@ -60,6 +61,7 @@ namespace DotNetBlazor.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Mobile")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 

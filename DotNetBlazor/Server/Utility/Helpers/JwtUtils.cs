@@ -14,22 +14,23 @@ namespace DotNetBlazor.Server.Utility.Helpers
 
     public class JwtUtils : IJwtUtils
     {
-        private readonly IConfiguration _configuration;
-
+        private readonly string _jwtKey;
+        private readonly string _expiryTime;
         public JwtUtils(IConfiguration configuration)
         {
-            _configuration = configuration;
+            _jwtKey = configuration["Jwt:Key"] ?? throw new Exception("Jwt:Key is not configured");
+            _expiryTime = configuration["Jwt:ExpiryInSeconds"] ?? throw new Exception("Jwt:ExpiryInSeconds is not configured"); ;
         }
 
         public JwtToken GenerateJwtToken(AuthUser request)
         {
             // generate token
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var key = Encoding.ASCII.GetBytes(_jwtKey);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("id", request.Id.ToString()) }),
-                Expires = DateTime.Now.AddSeconds(Convert.ToInt32(_configuration["Jwt:ExpiryInSeconds"])),
+                Expires = DateTime.Now.AddSeconds(Convert.ToInt32(_expiryTime)),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -39,10 +40,10 @@ namespace DotNetBlazor.Server.Utility.Helpers
         public string ValidateJwtToken(string token)
         {
             if (token == null)
-                return null;
+                return string.Empty;
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var key = Encoding.ASCII.GetBytes(_jwtKey);
             try
             {
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -61,10 +62,10 @@ namespace DotNetBlazor.Server.Utility.Helpers
                 // return user id from JWT token if validation successful
                 return id;
             }
-            catch
+            catch (Exception)
             {
                 // return null if validation fails
-                return null;
+                return string.Empty;
             }
         }
     }

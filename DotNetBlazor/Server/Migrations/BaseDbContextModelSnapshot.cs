@@ -43,6 +43,7 @@ namespace DotNetBlazor.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
@@ -57,6 +58,7 @@ namespace DotNetBlazor.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Mobile")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 

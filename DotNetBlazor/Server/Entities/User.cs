@@ -17,11 +17,11 @@ namespace DotNetBlazor.Server.Entities
         [Required, DataType(DataType.Password), MaxLength(500), MinLength(6)]
         public string Password { get; set; } = null!;
         [MaxLength(100), MinLength(2)]
-        public string? FullName { get; set; }
+        public string FullName { get; set; } = null!;
+        [MaxLength(20), MinLength(8), CheckUniqueUser]
+        public string Mobile { get; set; } = null!;
         [MaxLength(10), MinLength(1)]
         public string? Gender { get; set; }
-        [MaxLength(20), MinLength(8), CheckUniqueUser]
-        public string? Mobile { get; set; }
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
         [MaxLength(100), MinLength(2)]
@@ -36,17 +36,17 @@ namespace DotNetBlazor.Server.Entities
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         [DataType(DataType.DateTime)]
         public DateTime? UpdatedDate { get; set; }
-        public object this[string propertyName]
+        public object? this[string propertyName]
         {
             get
             {
-                PropertyInfo property = GetType().GetProperty(propertyName);
-                return property.GetValue(this, null);
+                PropertyInfo? property = GetType()?.GetProperty(propertyName);
+                return property?.GetValue(this, null);
             }
             set
             {
-                PropertyInfo property = GetType().GetProperty(propertyName);
-                property.SetValue(this, value, null);
+                PropertyInfo? property = GetType()?.GetProperty(propertyName);
+                property?.SetValue(this, value, null);
             }
         }
     }

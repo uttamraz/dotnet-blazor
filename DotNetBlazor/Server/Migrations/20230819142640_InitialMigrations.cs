@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DotNetBlazor.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialMigrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,9 +19,9 @@ namespace DotNetBlazor.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Password = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    FullName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    FullName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Mobile = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     Gender = table.Column<string>(type: "TEXT", maxLength: 10, nullable: true),
-                    Mobile = table.Column<string>(type: "TEXT", maxLength: 20, nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CurrentAddress = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
                     DocumentUrl = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),

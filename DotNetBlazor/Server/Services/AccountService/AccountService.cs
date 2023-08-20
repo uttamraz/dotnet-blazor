@@ -3,6 +3,7 @@ using DotNetBlazor.Server.Repository.RegistrationRepository;
 using DotNetBlazor.Server.Utility.Helpers;
 using DotNetBlazor.Shared.Models.Account;
 using DotNetBlazor.Shared.Models.Common;
+using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
 
 namespace DotNetBlazor.Server.Services.AccountService
@@ -12,12 +13,14 @@ namespace DotNetBlazor.Server.Services.AccountService
         private readonly IAccountRepository _accountRepository;
         private readonly IJwtUtils _jwtUtils;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IMemoryCache _cache;
 
-        public AccountService(IAccountRepository accountRepository, IJwtUtils jwtUtils, IServiceProvider serviceProvider)
+        public AccountService(IAccountRepository accountRepository, IJwtUtils jwtUtils, IServiceProvider serviceProvider, IMemoryCache cache)
         {
             _accountRepository = accountRepository;
             _jwtUtils = jwtUtils;
             _serviceProvider = serviceProvider;
+            _cache = cache;
         }
 
         public async Task<LoginResponseData> Login(LoginRequest request)
@@ -43,7 +46,11 @@ namespace DotNetBlazor.Server.Services.AccountService
             };
 
             var jwtToken = _jwtUtils.GenerateJwtToken(auth);
-            response.Token = jwtToken.Token;
+            if (!string.IsNullOrEmpty(jwtToken.Token))
+            {
+                response.Token = jwtToken.Token;
+                await _cache.SetRecordAsync(jwtToken.Token, auth, jwtToken.ExpiryTime.Subtract(DateTime.Now));
+            }
             return response;
         }
 
@@ -53,6 +60,7 @@ namespace DotNetBlazor.Server.Services.AccountService
             var userRequest = new User
             {
                 FullName = request.FullName,
+                Mobile = request.Mobile,
                 Email = request.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 PasswordChangeDate = DateTime.Now
