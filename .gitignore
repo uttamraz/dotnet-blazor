@@ -35,3 +35,4 @@ msbuild.wrn
 
 appsettings.Development.json
 *.db
+*db-*
