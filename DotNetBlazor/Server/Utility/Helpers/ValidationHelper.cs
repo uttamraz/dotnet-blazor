@@ -3,9 +3,9 @@ using System.Text.Json;
 
 namespace DotNetBlazor.Server.Utility.Helpers
 {
-    public class ValidationHelper
+    public static class ValidationHelper
     {
-        public static void Validate(object instance, IServiceProvider serviceProvider)
+        public static void Validate(this IServiceProvider serviceProvider, object instance)
         {
             var ctx = new ValidationContext(instance, serviceProvider, null);
             var errors = new List<ValidationResult>();

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,22 +17,15 @@ namespace DotNetBlazor.Server.Utility.Helpers
     {
         public static Exception GetExceptionByStatusCode(int statusCode, string message)
         {
-            switch (statusCode)
+            return statusCode switch
             {
-                case 400:
-                case 422:
-                    return new ValidationException(message);
-                case 401:
-                    return new UnauthorizedAccessException(message);
-                case 403:
-                    return new AccessViolationException(message);
-                case 404:
-                    return new FileNotFoundException(message);
-                case 500:
-                    return new Exception(message);
-                default:
-                    return new Exception(message);
-            }
+                400 or 422 => new ValidationException(message),
+                401 => new UnauthorizedAccessException(message),
+                403 => new AccessViolationException(message),
+                404 => new FileNotFoundException(message),
+                500 => new Exception(message),
+                _ => new Exception(message),
+            };
         }
 
         public static string MaskString(string str, int maskChar)
@@ -49,6 +43,35 @@ namespace DotNetBlazor.Server.Utility.Helpers
                 return memberExpression.Member.Name;
             }
             throw new ArgumentException("Invalid expression");
+        }
+
+        public static object? Prop(this object obj, string propertyName)
+        {
+            PropertyInfo? property = obj.GetType().GetProperty(propertyName);
+            return property?.GetValue(obj, null);
+        }
+
+        public static TDestination Map<TDestination>(this object? source) where TDestination : new()
+        {
+            var destination = new TDestination();
+            if (source != null)
+            {
+                PropertyInfo[] sourceProperties = source.GetType().GetProperties();
+                PropertyInfo[] destinationProperties = typeof(TDestination).GetProperties();
+
+                foreach (var sourceProperty in sourceProperties)
+                {
+                    var matchingDestinationProperty = Array.Find(destinationProperties, prop =>
+                        prop.Name == sourceProperty.Name && prop.PropertyType == sourceProperty.PropertyType);
+
+                    if (matchingDestinationProperty != null)
+                    {
+                        var value = sourceProperty.GetValue(source);
+                        matchingDestinationProperty.SetValue(destination, value);
+                    }
+                }
+            }
+            return destination;
         }
     }
 }
