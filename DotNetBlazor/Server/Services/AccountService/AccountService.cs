@@ -27,11 +27,7 @@ namespace DotNetBlazor.Server.Services.AccountService
         {
             var response = new LoginResponseData();
             // Get User
-            var user = await _accountRepository.LoginUser(new User { Email = request.Email });
-            if (user == null)
-            {
-                throw new ValidationException("Invalid username or password!");
-            }
+            var user = await _accountRepository.LoginUser(new User { Email = request.Email }) ?? throw new ValidationException("Invalid username or password!");
             // Validate Password
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
@@ -66,13 +62,9 @@ namespace DotNetBlazor.Server.Services.AccountService
                 PasswordChangeDate = DateTime.Now
             };
 
-            ValidationHelper.Validate(userRequest, _serviceProvider);
+            _serviceProvider.Validate(userRequest);
 
-            var user = await _accountRepository.RegisterUser(userRequest);
-            if (user == null)
-            {
-                throw new ValidationException("Registration failed!");
-            }
+            var user = await _accountRepository.RegisterUser(userRequest) ?? throw new ValidationException("Registration failed!");
             response.IsSuccess = true;
             return response;
         }
