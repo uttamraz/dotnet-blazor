@@ -8,6 +8,7 @@ namespace DotNetBlazor.Server.Context
         public BaseDbContext(DbContextOptions<BaseDbContext> options) : base(options) { }
 
         public virtual DbSet<User> Users { get; set; } = null!;
+        public virtual DbSet<Todo> Todo { get; set; } = null!;
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
