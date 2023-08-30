@@ -36,18 +36,5 @@ namespace DotNetBlazor.Server.Entities
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         [DataType(DataType.DateTime)]
         public DateTime? UpdatedDate { get; set; }
-        public object? this[string propertyName]
-        {
-            get
-            {
-                PropertyInfo? property = GetType()?.GetProperty(propertyName);
-                return property?.GetValue(this, null);
-            }
-            set
-            {
-                PropertyInfo? property = GetType()?.GetProperty(propertyName);
-                property?.SetValue(this, value, null);
-            }
-        }
     }
 }
