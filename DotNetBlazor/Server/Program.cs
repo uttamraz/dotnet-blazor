@@ -1,8 +1,10 @@
 using DotNetBlazor.Server.Context;
 using DotNetBlazor.Server.Repository.ProfileRepository;
 using DotNetBlazor.Server.Repository.RegistrationRepository;
+using DotNetBlazor.Server.Repository.TodoRepository;
 using DotNetBlazor.Server.Services.AccountService;
 using DotNetBlazor.Server.Services.ProfileService;
+using DotNetBlazor.Server.Services.TodoService;
 using DotNetBlazor.Server.Utility.Helpers;
 using DotNetBlazor.Server.Utility.Middleware;
 using Microsoft.EntityFrameworkCore;
@@ -45,10 +47,12 @@ builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
 //Services
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ITodoService, TodoService>();
 
 //Repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 
 //Adding DB Context with MSSQL
 builder.Services.AddDbContext<BaseDbContext>(options =>
