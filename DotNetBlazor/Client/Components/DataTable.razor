@@ -1,0 +1,39 @@
+﻿@using DotNetBlazor.Shared.Models.Common;
+@if (Data != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                @foreach (var columnKey in Data.List.First().Keys)
+                {
+                    <th>@columnKey</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rowData in Data.List)
+            {
+                <tr>
+                    @foreach (var columnKey in rowData.Keys)
+                    {
+                        <td>@rowData[columnKey]</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    [Parameter]
+    public string JsonData { get; set; }
+
+    private DataModel Data { get; set; }
+
+    private class DataModel
+    {
+        public List<Dictionary<string, object>> List { get; set; }
+        public Pagination Pagination { get; set; }
+    }
+}

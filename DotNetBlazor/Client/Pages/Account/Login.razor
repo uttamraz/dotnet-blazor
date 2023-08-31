@@ -37,13 +37,7 @@
                             <ValidationMessage For="@(() => model.Password)" />
                         </div>
 
-                        <button disabled="@loading" class="btn btn-primary">
-                            @if (loading)
-                            {
-                                <span class="spinner-border spinner-border-sm mr-1"></span>
-                            }
-                            Login
-                        </button>
+                        <SubmitButton Text="Login" Type="primary" />
 
                         <NavLink href="/register" class="btn btn-link">Don't have an account?</NavLink>
                     </EditForm>
