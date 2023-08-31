@@ -57,7 +57,7 @@ namespace DotNetBlazor.Server.Controllers
         [HttpGet("List")]
         [ProducesResponseType(typeof(TodoListResponse), StatusCodes.Status200OK)]
 
-        public async Task<IActionResult> List(TodoListRequest request)
+        public async Task<IActionResult> List([FromQuery] TodoListRequest request)
         {
             var data = await _todoService.List(request);
             return Ok(new CommonResponse(data, StatusCodes.Status200OK, "Success!"));
