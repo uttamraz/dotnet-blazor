@@ -1,39 +1,81 @@
 ﻿@using DotNetBlazor.Shared.Models.Common;
-@if (Data != null)
+@using DotNetBlazor.Client.Utility;
+
+@typeparam T
+
+@if (List != null)
 {
-    <table class="table">
-        <thead>
-            <tr>
-                @foreach (var columnKey in Data.List.First().Keys)
-                {
-                    <th>@columnKey</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var rowData in Data.List)
-            {
+    <div class="thead-light">
+        <table class="table table-striped table-bordered" cellspacing="0">
+            <thead class="thead-light">
                 <tr>
-                    @foreach (var columnKey in rowData.Keys)
+                    @foreach (var prop in typeof(T).GetProperties())
                     {
-                        <td>@rowData[columnKey]</td>
+                        <th>@prop.GetDisplayName()</th>
                     }
                 </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in List)
+                {
+                    <tr>
+                        @foreach (var prop in typeof(T).GetProperties())
+                        {
+                            <td>@prop.GetValue(item)</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="text-center">
+        <ul class="pagination justify-content-end">
+            <li class="page-item">
+                <button class="page-link" aria-label="Previous" @onclick="GoToPreviousPage">
+                    <span aria-hidden="true">&laquo;</span>
+                </button>
+            </li>
+            @for (int i = 1; i <= Pagination.TotalPage(); i++)
+            {
+                <li class="page-item @(i == Pagination.Page ? "active" : "")">
+                    <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+                </li>
             }
-        </tbody>
-    </table>
+            <li class="page-item">
+                <button class="page-link" aria-label="Next" @onclick="GoToNextPage">
+                    <span aria-hidden="true">&raquo;</span>
+                </button>
+            </li>
+        </ul>
+    </div>
 }
 
-
 @code {
-    [Parameter]
-    public string JsonData { get; set; }
+    [Parameter] public List<T> List { get; set; }
+    [Parameter] public Pagination Pagination { get; set; }
+    [Parameter] public EventCallback<int> PageChanged { get; set; }
 
-    private DataModel Data { get; set; }
-
-    private class DataModel
+    private void GoToPage(int pageNumber)
     {
-        public List<Dictionary<string, object>> List { get; set; }
-        public Pagination Pagination { get; set; }
+        if (Pagination.Page != pageNumber)
+        {
+            PageChanged.InvokeAsync(pageNumber);
+        }
+    }
+
+    private void GoToPreviousPage()
+    {
+        if (Pagination.Page > 1)
+        {
+            GoToPage(Pagination.Page - 1);
+        }
+    }
+
+    private void GoToNextPage()
+    {
+        if (Pagination.Page < Pagination.TotalPage())
+        {
+            GoToPage(Pagination.Page + 1);
+        }
     }
 }
