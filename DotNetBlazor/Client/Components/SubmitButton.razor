@@ -2,21 +2,37 @@
 @implements IDisposable
 @inject IEventHelper EventHelper
 
-<button disabled="@IsLoading" class="btn btn-@Type">
+<button disabled="@IsLoading" class="btn btn-@Type" @onclick="HandleClick" @attributes="FormAttributes">
     @if (IsLoading)
     {
         <span class="spinner-border spinner-border-sm mr-1"></span>
+    }
+    @if (!string.IsNullOrWhiteSpace(Icon)) {
+        <span class="oi oi-@Icon" aria-hidden="true"></span> 
     }
     @Text
 </button>
 
 @code {
-    [Parameter]
-    public string Text { get; set; } = "Submit";
-    [Parameter]
-    public string Type { get; set; } = "primary";
+    [Parameter] public string Text { get; set; } = "Submit";
+    [Parameter] public string Type { get; set; } = "primary";
+    [Parameter] public string? FormId { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
 
     private bool IsLoading = false;
+    private Dictionary<string, object> FormAttributes => FormId != null ? new Dictionary<string, object>
+        {
+            ["form"] = FormId
+        } : new Dictionary<string, object>();
+
+    private async Task HandleClick()
+    {
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync();
+        }
+    }
 
     protected override void OnInitialized()
     {
