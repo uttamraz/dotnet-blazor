@@ -56,16 +56,37 @@ namespace DotNetBlazor.Server.Repository.TodoRepository
         public async Task<TodoListData> List(TodoListRequest request)
         {
             var response = new TodoListData();
-            var data = await context.Todo.ToListAsync();
+            var query = context.Todo.AsQueryable();
+            // Apply filters if provided
+            if (request.Filter != null)
+            {
+                query = query.Where(item => item.UserId == request.Filter.UserId);
+                if (!string.IsNullOrWhiteSpace(request.Filter.Name))
+                {
+                    query = query.Where(item => item.Name.Contains(request.Filter.Name));
+                }
+                if (!string.IsNullOrWhiteSpace(request.Filter.Description))
+                {
+                    query = query.Where(item => item.Description.Contains(request.Filter.Description));
+                }
+                if (!string.IsNullOrWhiteSpace(request.Filter.Status))
+                {
+                    query = query.Where(item => item.Status == request.Filter.Status);
+                }
+            }
+            // Get the total count before pagination
+            int totalCount = await query.CountAsync();
+            // Apply pagination
+            query = query.Skip(request.Skip()).Take(request.PerPage);
+            var data = await query.ToListAsync();
             if (data != null)
             {
-                // Assuming TodoListData has a property to hold the list of Todo items
                 response.List = data.Select(item => item.Map<TodoDetail>()).ToList();
-                response.pagination = new Pagination
+                response.Pagination = new Pagination
                 {
-                    Page = 1,
-                    PerPage = 1000,
-                    Total = response.List.Count()
+                    Page = request.Page,
+                    PerPage = request.PerPage,
+                    Total = totalCount
                 };
             }
             return response;

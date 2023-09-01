@@ -1,0 +1,72 @@
+@using DotNetBlazor.Client.Components
+@using DotNetBlazor.Shared.Models.Todo
+@using DotNetBlazor.Client.Services
+@inherits ComponentBase
+@using System.Net
+@inject ITodoService TodoService
+@inject IAlertService AlertService
+
+<EditForm id="@FormId" Model="@createModel" OnValidSubmit="Create">
+    <ValidationError />
+    <DataAnnotationsValidator />
+    <div class="row mb-3">
+        <div class="col-sm-3">
+            <h6 class="mb-0">Task Name</h6>
+        </div>
+        <div class="col-sm-9">
+            <InputText class="form-control" @bind-Value="createModel.Name" />
+            <ValidationMessage For="@(() => createModel.Name)" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-3">
+            <h6 class="mb-0">Description</h6>
+        </div>
+        <div class="col-sm-9">
+            <InputText class="form-control" @bind-Value="createModel.Description" />
+            <ValidationMessage For="@(() => createModel.Description)" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-3">
+            <h6 class="mb-0">Status</h6>
+        </div>
+        <div class="col-sm-9">
+            <InputSelect class="form-control" @bind-Value="createModel.Status">
+                <option value="">--Select--</option>
+                <option value="Todo">Todo</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+            </InputSelect>
+            <ValidationMessage For="@(() => createModel.Status)" />
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private CreateTodoRequest createModel = new();
+    [Parameter] public string FormId { get; set; } = "Form";
+    public async Task Create()
+    {
+        try
+        {
+            CreateTodoResponse response = await TodoService.Create(createModel);
+
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
+            {
+                createModel = new CreateTodoRequest();
+                AlertService.Success("Todo created successfully!");
+            }
+            else
+            {
+                AlertService.Error(response?.Response?.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+        }
+    }
+}

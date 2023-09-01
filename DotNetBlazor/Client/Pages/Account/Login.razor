@@ -33,17 +33,12 @@
 
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <InputText id="password" @bind-Value="model.Password" type="password" class="form-control" />
+                            <InputText id="password" @bind-Value="model.Password" type="password"
+                                class="form-control" />
                             <ValidationMessage For="@(() => model.Password)" />
                         </div>
 
-                        <button disabled="@loading" class="btn btn-primary">
-                            @if (loading)
-                            {
-                                <span class="spinner-border spinner-border-sm mr-1"></span>
-                            }
-                            Login
-                        </button>
+                        <SubmitButton Text="Login" Type="primary" />
 
                         <NavLink href="/register" class="btn btn-link">Don't have an account?</NavLink>
                     </EditForm>
@@ -55,10 +50,9 @@
 
 @code {
     private LoginRequest model = new();
-    private bool loading;
 
     [SupplyParameterFromQuery]
-    public string? ReturnUrl { get; set; }
+    public string? returnUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,14 +65,12 @@
     private async void OnValidSubmit()
     {
         AlertService.Clear();
-
-        loading = true;
         try
         {
             var response = await AccountService.LoginAsync(model);
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
-                NavigationManager.NavigateTo(ReturnUrl ?? "/");
+                NavigationManager.NavigateTo(returnUrl ?? "/");
             }
             else
             {
@@ -88,11 +80,6 @@
         catch (Exception ex)
         {
             AlertService.Error(ex.Message);
-        }
-        finally
-        {
-            loading = false;
-            StateHasChanged();
         }
     }
 }

@@ -15,5 +15,6 @@ builder.Services.AddScoped<IApiHelper, ApiHelper>();
 builder.Services.AddScoped<IEventHelper, EventHelper>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IProfieService, ProfileService>();
+builder.Services.AddScoped<ITodoService, TodoService>();
 
 await builder.Build().RunAsync();

@@ -31,6 +31,8 @@ namespace DotNetBlazor.Server.Services.TodoService
 
         public async Task<TodoListData> List(TodoListRequest request)
         {
+            request.Filter ??= new TodoFilter();
+            request.Filter.UserId = _contextHelper.Id();
             return await _todoRepository.List(request);
         }
 

@@ -1,0 +1,58 @@
+@inherits ComponentBase
+
+@if (IsOpen)
+{
+    <div class="modal show" tabindex="-1" role="dialog" style="display: block; background: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Header</h5>
+                    <button type="button" class="close" @onclick="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @if (Body != null)
+                    {
+                        @Body
+                    }
+                    else
+                    {
+                        <p>Are you sure?</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    @if (Footer != null)
+                    {
+                        @Footer
+                    }
+                    @if (CloseButton)
+                    {
+                        <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Header { get; set; } = "Modal";
+    [Parameter] public RenderFragment? Body { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public bool CloseButton { get; set; } = true;
+
+    private void Open()
+    {
+        IsOpen = true;
+        StateHasChanged();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        StateHasChanged();
+    }
+}

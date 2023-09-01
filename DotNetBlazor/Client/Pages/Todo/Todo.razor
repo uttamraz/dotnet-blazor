@@ -1,0 +1,124 @@
+@page "/todo"
+
+@using DotNetBlazor.Client.Components
+@using DotNetBlazor.Client.Pages.Todo.Components
+@using DotNetBlazor.Client.Services
+@using DotNetBlazor.Shared.Models.Todo
+@using DotNetBlazor.Shared.Models.Common;
+@using DotNetBlazor.Client.Utility;
+@using System.Net
+@inject ITodoService TodoService
+@inject IAlertService AlertService
+
+<PageTitle>Todo</PageTitle>
+
+<div class="container">
+    <div class="main-body">
+        <div class="row mb-2">
+            <div class="col-md-12">
+                <SubmitButton OnClick="ShowCreateTaskModal" Text="Add Task" Icon="plus" Type="primary" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <DataTable List="@list" Pagination="@pagination" PageChanged="HandlePageChange" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<Modal Header="Create Task" IsOpen="IsOpenCreateModal">
+
+    <Body>
+        <CreateTaskForm FormId="CreateForm" />
+    </Body>
+    <Footer>
+        <SubmitButton FormId="CreateForm" Text="Create" Type="success" />
+    </Footer>
+</Modal>
+
+
+@code {
+    private List<TodoDetail> list = new();
+    private Pagination pagination = new();
+    private UpdateTodoRequest updateModel = new();
+    private DeleteTodoRequest deleteModel = new();
+
+    private bool IsOpenCreateModal = false;
+    private void ShowCreateTaskModal()
+    {
+        IsOpenCreateModal = true;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await List(1);
+    }
+    private async void HandlePageChange(int newPage)
+    {
+        await List(newPage);
+    }
+    private async Task List(int page)
+    {
+        try
+        {
+            TodoListResponse response = await TodoService.List(new TodoListRequest
+                {
+                    PerPage = 10,
+                    Page = page
+                });
+
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
+            {
+                list = response.Data.List;
+                pagination = response.Data.Pagination;
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+        }
+    }
+
+    private async Task Update()
+    {
+        try
+        {
+            UpdateTodoResponse response = await TodoService.Update(updateModel);
+
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
+            {
+                AlertService.Success("Todo updated successfully!");
+            }
+            else
+            {
+                AlertService.Error(response?.Response?.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+        }
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            DeleteTodoResponse response = await TodoService.Delete(deleteModel);
+
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
+            {
+                AlertService.Success("Todo deleted successfully!");
+            }
+            else
+            {
+                AlertService.Error(response?.Response?.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+        }
+    }
+}
