@@ -10,7 +10,7 @@ namespace DotNetBlazor.Client.Utility
 
     public interface IApiHelper
     {
-        Task<T> Get<T>(string url);
+        Task<T> Get<T>(string url, object? query = null);
         Task<T> Post<T>(string url, object data);
     }
 
@@ -27,9 +27,11 @@ namespace DotNetBlazor.Client.Utility
             _eventHelper = eventHelper;
         }
 
-        public async Task<T> Get<T>(string url)
+        public async Task<T> Get<T>(string url, object? query = null)
         {
-            return await Send<T>(url, HttpMethod.Get);
+            string queryString = QueryStringFromObject(query);
+            string requestUrl = $"{url}?{queryString}";
+            return await Send<T>(requestUrl, HttpMethod.Get);
         }
 
         public async Task<T> Post<T>(string url, object data)
@@ -88,6 +90,22 @@ namespace DotNetBlazor.Client.Utility
                 request.Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
             }
             return request;
+        }
+
+        private string QueryStringFromObject(object? obj)
+        {
+            if (obj == null) return string.Empty;
+            var queryParams = new StringBuilder();
+            foreach (var property in obj.GetType().GetProperties())
+            {
+                var value = property.GetValue(obj);
+                if (value != null)
+                {
+                    if (queryParams.Length > 0) queryParams.Append("&");
+                    queryParams.Append($"{property.Name}={Uri.EscapeDataString(value.ToString())}");
+                }
+            }
+            return queryParams.ToString();
         }
     }
 
