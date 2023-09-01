@@ -10,9 +10,9 @@ namespace DotNetBlazor.Shared.Models.Common
             get { return perPage == -1 ? 1000000 : perPage; }
             set { perPage = value; }
         }
-        public int Skip
+        public int Skip()
         {
-            get { return perPage == -1 ? 0 : (Page - 1) * perPage; }
+            return perPage == -1 ? 0 : (Page - 1) * perPage;
         }
     }
 }
