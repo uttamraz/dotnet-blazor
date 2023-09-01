@@ -27,7 +27,8 @@
 
                         <div class="mb-3">
                             <label for="fullName" class="form-label">Full Name</label>
-                            <InputText id="fullName" @bind-Value="model.FullName" class="form-control" autocomplete="off" />
+                            <InputText id="fullName" @bind-Value="model.FullName" class="form-control"
+                                autocomplete="off" />
                             <ValidationMessage For="@(() => model.FullName)" />
                         </div>
 
@@ -45,7 +46,8 @@
 
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <InputText id="password" @bind-Value="model.Password" type="password" class="form-control" autocomplete="off" />
+                            <InputText id="password" @bind-Value="model.Password" type="password" class="form-control"
+                                autocomplete="off" />
                             <ValidationMessage For="@(() => model.Password)" />
                         </div>
 
@@ -62,8 +64,6 @@
 
 @code {
     private RegistrationRequest model = new();
-    private bool loading;
-
     protected override async Task OnInitializedAsync()
     {
         if (await AccountService.IsAuthenticated())
@@ -75,8 +75,6 @@
     private async void OnValidSubmit()
     {
         AlertService.Clear();
-
-        loading = true;
         try
         {
             var response = await AccountService.RegisterAsync(model);
@@ -94,11 +92,5 @@
         {
             AlertService.Error(ex.Message);
         }
-        finally
-        {
-            loading = false;
-            StateHasChanged();
-        }
-
     }
 }
