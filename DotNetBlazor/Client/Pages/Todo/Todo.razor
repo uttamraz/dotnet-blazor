@@ -1,8 +1,11 @@
 @page "/todo"
 
 @using DotNetBlazor.Client.Components
+@using DotNetBlazor.Client.Pages.Todo.Components
 @using DotNetBlazor.Client.Services
 @using DotNetBlazor.Shared.Models.Todo
+@using DotNetBlazor.Shared.Models.Common;
+@using DotNetBlazor.Client.Utility;
 @using System.Net
 @inject ITodoService TodoService
 @inject IAlertService AlertService
@@ -11,122 +14,64 @@
 
 <div class="container">
     <div class="main-body">
+        <div class="row mb-2">
+            <div class="col-md-12">
+                <SubmitButton OnClick="ShowCreateTaskModal" Text="Add Task" Icon="plus" Type="primary" />
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-12">
-                <button class="btn btn-primary" @onclick="ShowCreateTaskModal">Add Task</button>
+                <DataTable List="@list" Pagination="@pagination" PageChanged="HandlePageChange" />
             </div>
         </div>
     </div>
 </div>
 
+<Modal Header="Create Task" IsOpen="IsOpenCreateModal">
 
-@if (showCreateTaskModal)
-{
-    <div class="modal show" tabindex="-1" role="dialog" style="display: block; background: rgba(0, 0, 0, 0.5);">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create Task</h5>
-                    <button type="button" class="close" @onclick="CloseCreateTaskModal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="@createModel" OnValidSubmit="Create">
-                        <ValidationError />
-                        <DataAnnotationsValidator />
-                        <div class="row mb-3">
-                            <div class="col-sm-3">
-                                <h6 class="mb-0">Task Name</h6>
-                            </div>
-                            <div class="col-sm-9">
-                                <InputText class="form-control" @bind-Value="createModel.Name" />
-                                <ValidationMessage For="@(() => createModel.Name)" />
-                            </div>
-                        </div>
+    <Body>
+        <CreateTaskForm FormId="CreateForm" />
+    </Body>
+    <Footer>
+        <SubmitButton FormId="CreateForm" Text="Create" Type="success" />
+    </Footer>
+</Modal>
 
-                        <div class="row mb-3">
-                            <div class="col-sm-3">
-                                <h6 class="mb-0">Description</h6>
-                            </div>
-                            <div class="col-sm-9">
-                                <InputText class="form-control" @bind-Value="createModel.Description" />
-                                <ValidationMessage For="@(() => createModel.Description)" />
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-sm-3">
-                                <h6 class="mb-0">Status</h6>
-                            </div>
-                            <div class="col-sm-9">
-                                <InputSelect class="form-control" @bind-Value="createModel.Status">
-                                    <option value="">--Select--</option>
-                                    <option value="Todo">Todo</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Done">Done</option>
-                                </InputSelect>
-                                <ValidationMessage For="@(() => createModel.Status)" />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-sm-3"></div>
-                            <div class="col-sm-9">
-                                <SubmitButton Text="Create" Type="success" />
-                                <button type="button" class="btn btn-secondary" @onclick="CloseCreateTaskModal">Cancel</button>
-                            </div>
-                        </div>
-                    </EditForm>
-                </div>
-            </div>
-        </div>
-    </div>
-}
 
 @code {
-    private CreateTodoRequest createModel = new();
+    private List<TodoDetail> list = new();
+    private Pagination pagination = new();
     private UpdateTodoRequest updateModel = new();
     private DeleteTodoRequest deleteModel = new();
-    private bool showCreateTaskModal = false;
 
+    private bool IsOpenCreateModal = false;
     private void ShowCreateTaskModal()
     {
-        showCreateTaskModal = true;
-    }
-
-    private void CloseCreateTaskModal()
-    {
-        showCreateTaskModal = false;
+        IsOpenCreateModal = true;
     }
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            TodoListResponse response = await TodoService.List(new TodoListRequest());
-            if (response?.Response?.Status == (int)HttpStatusCode.OK)
-            {
-            }
-        }
-        catch (Exception ex)
-        {
-            AlertService.Error(ex.Message);
-        }
+        await List(1);
     }
-
-    private async Task Create()
+    private async void HandlePageChange(int newPage)
+    {
+        await List(newPage);
+    }
+    private async Task List(int page)
     {
         try
         {
-            CreateTodoResponse response = await TodoService.Create(createModel);
+            TodoListResponse response = await TodoService.List(new TodoListRequest
+                {
+                    PerPage = 10,
+                    Page = page
+                });
 
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
-                AlertService.Success("Todo created successfully!");
-            }
-            else
-            {
-                AlertService.Error(response?.Response?.Message);
+                list = response.Data.List;
+                pagination = response.Data.Pagination;
             }
         }
         catch (Exception ex)

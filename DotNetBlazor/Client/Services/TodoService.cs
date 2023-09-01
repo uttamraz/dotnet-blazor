@@ -35,7 +35,7 @@ namespace DotNetBlazor.Client.Services
 
         public async Task<TodoListResponse> List(TodoListRequest request)
         {
-            var list = await _apiHelper.Get<TodoListResponse>("api/v1/todo/List");
+            var list = await _apiHelper.Get<TodoListResponse>("api/v1/todo/List", request);
             return list;
         }
 
