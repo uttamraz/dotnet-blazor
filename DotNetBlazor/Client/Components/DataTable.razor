@@ -5,77 +5,175 @@
 
 @if (List != null)
 {
-    <div class="thead-light">
-        <table class="table table-striped table-bordered" cellspacing="0">
-            <thead class="thead-light">
-                <tr>
-                    @foreach (var prop in typeof(T).GetProperties())
-                    {
-                        <th>@prop.GetDisplayName()</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in List)
-                {
-                    <tr>
-                        @foreach (var prop in typeof(T).GetProperties())
+    <div class="dataTables_wrapper dt-bootstrap5">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="dataTables_length">
+                    <label>Show
+                        <select class="form-select form-select-sm" @bind="listRequest.PerPage"
+                        @oninput="HandlePerPageChange">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        entries
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div id="example_filter" class="dataTables_filter"><label>Search:
+                        <input type="search" class="form-control form-control-sm" @bind="listRequest.Query"
+                            placeholder="Search ..." @oninput="HandleQueryChange" />
+                    </label></div>
+            </div>
+        </div>
+        <div class="row dt-row">
+            <div class="col-md-12">
+                <table class="table table-striped dataTable" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            @foreach (var prop in typeof(T).GetProperties())
+                            {
+                                <th>@prop.GetDisplayName()</th>
+                            }
+                            @if (Edit.HasDelegate || Delete.HasDelegate)
+                            {
+                                <th>Action</th>
+                            }
+                        </tr>
+
+
+                    </thead>
+                    <tbody>
+                        @foreach (var item in List)
                         {
-                            <td>@prop.GetValue(item)</td>
+                            <tr>
+                                @foreach (var prop in typeof(T).GetProperties())
+                                {
+                                    <td>@prop.GetValue(item)</td>
+                                }
+                                @if (Edit.HasDelegate || Delete.HasDelegate)
+                                {
+                                    <td class="align-center">
+                                        @if (Edit.HasDelegate)
+                                        {
+                                            <a class="btn btn-sm btn-primary mx-1" @onclick="() => EditItem(item)">
+                                                <i class="oi oi-pencil"></i>
+                                            </a>
+                                        }
+                                        @if (Delete.HasDelegate)
+                                        {
+                                            <a class="btn btn-sm btn-danger mx-1" @onclick="() => DeleteItem(item)">
+                                                <i class="oi oi-trash"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                }
+                            </tr>
                         }
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    <div class="text-center">
-        <ul class="pagination justify-content-end">
-            <li class="page-item">
-                <button class="page-link" aria-label="Previous" @onclick="GoToPreviousPage">
-                    <span aria-hidden="true">&laquo;</span>
-                </button>
-            </li>
-            @for (int i = 1; i <= Pagination.TotalPage(); i++)
-            {
-                <li class="page-item @(i == Pagination.Page ? "active" : "")">
-                    <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
-                </li>
-            }
-            <li class="page-item">
-                <button class="page-link" aria-label="Next" @onclick="GoToNextPage">
-                    <span aria-hidden="true">&raquo;</span>
-                </button>
-            </li>
-        </ul>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5">
+                <div class="dataTables_info">Showing @((Pagination.Page - 1) * Pagination.PerPage + 1) to
+                    @(Math.Min(Pagination.Total, Pagination.Page * Pagination.PerPage)) of @Pagination.Total entries
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="dataTables_paginate paging_simple_numbers">
+                    <ul class="pagination">
+                        <li class="paginate_button page-item previous @(Pagination.Page < 2 ? "disabled" : "")">
+                            <a @onclick=" GoToPreviousPage" class="page-link">Previous</a>
+                        </li>
+
+                        @for (int i = 1; i <= Pagination.TotalPage(); i++)
+                        {
+                            int currentPage = i;
+                            <li class="paginate_button page-item @(i == Pagination.Page ? "active" : "")">
+                                <a @onclick="() => GoToPage(currentPage)" class="page-link">@i</a>
+                            </li>
+                        }
+                        <li
+                            class="paginate_button page-item next @(Pagination.Page >= Pagination.TotalPage() ? "disabled" : "")">
+                            <a @onclick="GoToNextPage" class="page-link">Next</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
 @code {
     [Parameter] public List<T> List { get; set; }
     [Parameter] public Pagination Pagination { get; set; }
-    [Parameter] public EventCallback<int> PageChanged { get; set; }
+    [Parameter] public EventCallback<ListRequest> PageChanged { get; set; }
+    [Parameter] public EventCallback<object> Edit { get; set; }
+    [Parameter] public EventCallback<object> Delete { get; set; }
+    private ListRequest listRequest = new();
+    private System.Timers.Timer searchInputTimer;
 
+    protected override void OnInitialized()
+    {
+        listRequest.Page = 1;
+        listRequest.PerPage = 5;
+
+        // Initialize the timer
+        searchInputTimer = new System.Timers.Timer(1000);
+        searchInputTimer.AutoReset = false;
+        searchInputTimer.Elapsed += HandleSearchTimerElapsed;
+    }
+
+    private void HandlePerPageChange(ChangeEventArgs e)
+    {
+        listRequest.PerPage = int.Parse(e.Value.ToString());
+        HandlePageChange();
+    }
+
+    private void HandleQueryChange(ChangeEventArgs e)
+    {
+        listRequest.Query = e.Value?.ToString();
+        searchInputTimer.Stop();
+        searchInputTimer.Start();
+    }
+    private void HandleSearchTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+    {
+        searchInputTimer.Stop();
+        HandlePageChange();
+    }
+    private void HandlePageChange()
+    {
+        PageChanged.InvokeAsync(listRequest);
+    }
     private void GoToPage(int pageNumber)
     {
-        if (Pagination.Page != pageNumber)
-        {
-            PageChanged.InvokeAsync(pageNumber);
-        }
+        listRequest.Page = pageNumber;
+        HandlePageChange();
     }
 
     private void GoToPreviousPage()
     {
-        if (Pagination.Page > 1)
-        {
-            GoToPage(Pagination.Page - 1);
-        }
+        listRequest.Page--;
+        HandlePageChange();
     }
 
     private void GoToNextPage()
     {
-        if (Pagination.Page < Pagination.TotalPage())
-        {
-            GoToPage(Pagination.Page + 1);
-        }
+        listRequest.Page++;
+        HandlePageChange();
+    }
+
+    private void EditItem(object item)
+    {
+        Edit.InvokeAsync(item);
+    }
+
+    private void DeleteItem(object item)
+    {
+        Delete.InvokeAsync(item);
     }
 }
