@@ -60,20 +60,22 @@ namespace DotNetBlazor.Server.Repository.TodoRepository
             // Apply filters if provided
             if (request.Filter != null)
             {
-                query = query.Where(item => item.UserId == request.Filter.UserId);
-                if (!string.IsNullOrWhiteSpace(request.Filter.Name))
-                {
-                    query = query.Where(item => item.Name.Contains(request.Filter.Name));
-                }
-                if (!string.IsNullOrWhiteSpace(request.Filter.Description))
-                {
-                    query = query.Where(item => item.Description.Contains(request.Filter.Description));
-                }
-                if (!string.IsNullOrWhiteSpace(request.Filter.Status))
-                {
-                    query = query.Where(item => item.Status == request.Filter.Status);
-                }
+                query = query.Where(item =>
+                    item.UserId == request.Filter.UserId &&
+                    (string.IsNullOrWhiteSpace(request.Filter.Name) || item.Name.Contains(request.Filter.Name)) &&
+                    (string.IsNullOrWhiteSpace(request.Filter.Description) || item.Description.Contains(request.Filter.Description)) &&
+                    (string.IsNullOrWhiteSpace(request.Filter.Status) || item.Status == request.Filter.Status));
             }
+
+
+            if (!string.IsNullOrWhiteSpace(request.Query))
+            {
+                query = query.Where(item =>
+                    item.Name.Contains(request.Query) ||
+                    item.Description.Contains(request.Query) ||
+                    item.Status == request.Query);
+            }
+
             // Get the total count before pagination
             int totalCount = await query.CountAsync();
             // Apply pagination

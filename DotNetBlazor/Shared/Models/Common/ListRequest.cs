@@ -14,5 +14,6 @@ namespace DotNetBlazor.Shared.Models.Common
         {
             return perPage == -1 ? 0 : (Page - 1) * perPage;
         }
+        public string? Query { get; set; }
     }
 }

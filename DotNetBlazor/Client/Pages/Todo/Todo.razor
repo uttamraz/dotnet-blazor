@@ -16,62 +16,94 @@
     <div class="main-body">
         <div class="row mb-2">
             <div class="col-md-12">
-                <SubmitButton OnClick="ShowCreateTaskModal" Text="Add Task" Icon="plus" Type="primary" />
+                <SubmitButton OnClick="HandleCreate" Text="Add Task" Icon="plus" Type="primary" />
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-12">
-                <DataTable List="@list" Pagination="@pagination" PageChanged="HandlePageChange" />
+                <DataTable List="@list" Pagination="@pagination" PageChanged="HandlePageChange" Edit="HandleEdit"
+                    Delete="HandleDelete" />
             </div>
         </div>
     </div>
 </div>
 
-<Modal Header="Create Task" IsOpen="IsOpenCreateModal">
+<Modal Header="Create Task" IsOpen="IsOpenCreateModal" Close="()=> IsOpenCreateModal = false">
 
     <Body>
-        <CreateTaskForm FormId="CreateForm" />
+        <TodoForm FormId="CreateForm" OnSubmit="Create" />
     </Body>
     <Footer>
         <SubmitButton FormId="CreateForm" Text="Create" Type="success" />
     </Footer>
 </Modal>
 
+<Modal Header="Edit Task" IsOpen="IsOpenUpdateModal" Close="()=> IsOpenUpdateModal = false">
+
+    <Body>
+        <TodoForm FormId="UpdateForm" Model="todoDetail" OnSubmit="Update" />
+    </Body>
+    <Footer>
+        <SubmitButton FormId="UpdateForm" Text="Update" Type="success" />
+    </Footer>
+</Modal>
+
+<Modal Header="Delete Task" IsOpen="IsOpenDeleteModal" Close="()=> IsOpenDeleteModal = false">
+
+    <Body>
+        <p>Are you sure want to delete this item?</p>
+    </Body>
+    <Footer>
+        <SubmitButton Text="Delete" Type="danger" OnClick="Delete" />
+    </Footer>
+</Modal>
+
 
 @code {
     private List<TodoDetail> list = new();
+    private ListRequest listRequest = new();
     private Pagination pagination = new();
-    private UpdateTodoRequest updateModel = new();
+    private TodoDetail todoDetail = new();
     private DeleteTodoRequest deleteModel = new();
 
     private bool IsOpenCreateModal = false;
-    private void ShowCreateTaskModal()
-    {
-        IsOpenCreateModal = true;
-    }
+    private bool IsOpenUpdateModal = false;
+    private bool IsOpenDeleteModal = false;
     protected override async Task OnInitializedAsync()
     {
-        await List(1);
+        listRequest.Page = 1;
+        listRequest.PerPage = 5;
+        await List(listRequest);
     }
-    private async void HandlePageChange(int newPage)
+    private async void HandlePageChange(ListRequest changeRequest)
     {
-        await List(newPage);
+        listRequest = changeRequest;
+        await List(listRequest);
     }
-    private async Task List(int page)
+    private void HandleCreate() => IsOpenCreateModal = true;
+    private void HandleEdit(object item)
+    {
+        todoDetail = item.Map<TodoDetail>();
+        IsOpenUpdateModal = true;
+    }
+    private void HandleDelete(object item)
+    {
+        deleteModel = item.Map<DeleteTodoRequest>();
+        IsOpenDeleteModal = true;
+    }
+
+    private async Task List(ListRequest listRequest)
     {
         try
         {
-            TodoListResponse response = await TodoService.List(new TodoListRequest
-                {
-                    PerPage = 10,
-                    Page = page
-                });
+            TodoListResponse response = await TodoService.List(listRequest.Map<TodoListRequest>());
 
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
                 list = response.Data.List;
                 pagination = response.Data.Pagination;
+                StateHasChanged();
             }
         }
         catch (Exception ex)
@@ -80,15 +112,54 @@
         }
     }
 
-    private async Task Update()
+    private async Task Create(TodoDetail model)
     {
         try
         {
-            UpdateTodoResponse response = await TodoService.Update(updateModel);
+            // Logic for creating a new item
+            CreateTodoResponse response = await TodoService.Create(new CreateTodoRequest
+                {
+                    Name = model.Name,
+                    Description = model.Description,
+                    Status = model.Status
+                });
 
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
+                model = new TodoDetail(); // Clear the form
+                AlertService.Success("Todo created successfully!");
+                IsOpenCreateModal = false;
+                _ = List(listRequest);
+            }
+            else
+            {
+                AlertService.Error(response?.Response?.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+        }
+    }
+
+    private async Task Update(TodoDetail model)
+    {
+        try
+        {
+            UpdateTodoResponse response = await TodoService.Update(new UpdateTodoRequest
+                {
+                    Id = model.Id,
+                    Name = model.Name,
+                    Description = model.Description,
+                    Status = model.Status
+                });
+
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
+            {
+                model = new TodoDetail();
                 AlertService.Success("Todo updated successfully!");
+                IsOpenUpdateModal = false;
+                _ = List(listRequest);
             }
             else
             {
@@ -110,6 +181,8 @@
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
                 AlertService.Success("Todo deleted successfully!");
+                IsOpenDeleteModal = false;
+                _ = List(listRequest);
             }
             else
             {
