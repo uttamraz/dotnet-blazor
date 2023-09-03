@@ -3,7 +3,6 @@ using DotNetBlazor.Server.Repository.ProfileRepository;
 using DotNetBlazor.Server.Utility.Helpers;
 using DotNetBlazor.Shared.Models.Profile;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 
 namespace DotNetBlazor.Server.Services.ProfileService
 {
@@ -11,13 +10,15 @@ namespace DotNetBlazor.Server.Services.ProfileService
     {
         private readonly IProfileRepository _profileRepository;
         private readonly IContextHelper _contextHelper;
+        private readonly IServiceProvider _serviceProvider;
 
 
-        public ProfileService(IProfileRepository profileRepository, IContextHelper contextHelper)
+        public ProfileService(IProfileRepository profileRepository, IContextHelper contextHelper, IServiceProvider serviceProvider)
 
         {
             _profileRepository = profileRepository;
             _contextHelper = contextHelper;
+            _serviceProvider = serviceProvider;
         }
         public async Task<UserDetail> UpdateProfile(UserUpdateRequest request)
         {
@@ -32,6 +33,8 @@ namespace DotNetBlazor.Server.Services.ProfileService
                 DocumentUrl = request.DocumentUrl,
                 UpdatedDate = DateTime.Now
             };
+
+            await Task.Run(() => _serviceProvider.Validate(userRequest));
 
             var user = await _profileRepository.UpdateProfile(userRequest) ?? throw new ValidationException("Profile update failed!");
             return new UserDetail
