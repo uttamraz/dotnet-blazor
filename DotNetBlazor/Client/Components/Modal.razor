@@ -7,7 +7,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">@Header</h5>
-                    <button type="button" class="close" @onclick="Close">
+                    <button type="button" class="close" @onclick="HandleClose">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -28,9 +28,8 @@
                     }
                     @if (CloseButton)
                     {
-                        <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                        <button type="button" class="btn btn-secondary" @onclick="HandleClose">Close</button>
                     }
-
                 </div>
             </div>
         </div>
@@ -43,16 +42,10 @@
     [Parameter] public RenderFragment? Footer { get; set; }
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public bool CloseButton { get; set; } = true;
+    [Parameter] public EventCallback Close { get; set; }
 
-    private void Open()
+    private void HandleClose()
     {
-        IsOpen = true;
-        StateHasChanged();
-    }
-
-    private void Close()
-    {
-        IsOpen = false;
-        StateHasChanged();
+        Close.InvokeAsync();
     }
 }

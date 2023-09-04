@@ -62,7 +62,7 @@ namespace DotNetBlazor.Server.Services.AccountService
                 PasswordChangeDate = DateTime.Now
             };
 
-            _serviceProvider.Validate(userRequest);
+            await Task.Run(() => _serviceProvider.Validate(userRequest));
 
             var user = await _accountRepository.RegisterUser(userRequest) ?? throw new ValidationException("Registration failed!");
             response.IsSuccess = true;

@@ -12,9 +12,9 @@ namespace DotNetBlazor.Server.Entities
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        [Required, MaxLength(50), MinLength(6), EmailAddress, CheckUniqueUser]
+        [RequiredOnCreate, MaxLength(50), MinLength(6), EmailAddress, CheckUniqueUser]
         public string Email { get; set; } = null!;
-        [Required, DataType(DataType.Password), MaxLength(500), MinLength(6)]
+        [RequiredOnCreate, DataType(DataType.Password), MaxLength(500), MinLength(6)]
         public string Password { get; set; } = null!;
         [MaxLength(100), MinLength(2)]
         public string FullName { get; set; } = null!;
@@ -36,5 +36,19 @@ namespace DotNetBlazor.Server.Entities
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         [DataType(DataType.DateTime)]
         public DateTime? UpdatedDate { get; set; }
+
+        public object this[string propertyName]
+        {
+            get
+            {
+                PropertyInfo property = GetType().GetProperty(propertyName);
+                return property.GetValue(this, null);
+            }
+            set
+            {
+                PropertyInfo property = GetType().GetProperty(propertyName);
+                property.SetValue(this, value, null);
+            }
+        }
     }
 }

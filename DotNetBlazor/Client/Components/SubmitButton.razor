@@ -5,10 +5,10 @@
 <button disabled="@IsLoading" class="btn btn-@Type" @onclick="HandleClick" @attributes="FormAttributes">
     @if (IsLoading)
     {
-        <span class="spinner-border spinner-border-sm mr-1"></span>
+        <span class="spinner-border spinner-border-sm mx-1"></span>
     }
     @if (!string.IsNullOrWhiteSpace(Icon)) {
-        <span class="oi oi-@Icon" aria-hidden="true"></span> 
+        <span class="mx-1 oi oi-@Icon" aria-hidden="true"></span> 
     }
     @Text
 </button>

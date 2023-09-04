@@ -1,0 +1,55 @@
+@using DotNetBlazor.Client.Components
+@using DotNetBlazor.Client.Utility;
+@using DotNetBlazor.Shared.Models.Todo
+@inherits ComponentBase
+
+<EditForm id="@FormId" Model="@Model" OnValidSubmit="SubmitHandle">
+    <ValidationError />
+    <DataAnnotationsValidator />
+    <div class="row mb-3">
+        <div class="col-sm-3">
+            <label for="@nameof(Model.Name)">@Model.GetDisplayName(nameof(Model.Name))</label>
+        </div>
+        <div class="col-sm-9">
+            <InputText class="form-control" id="taskName" @bind-Value="Model.Name" />
+            <ValidationMessage For="@(() => Model.Name)" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-3">
+            <label for="@nameof(Model.Description)">@Model.GetDisplayName(nameof(Model.Description))</label>
+        </div>
+        <div class="col-sm-9">
+            <InputText class="form-control" id="description" @bind-Value="Model.Description" />
+            <ValidationMessage For="@(() => Model.Description)" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-3">
+            <label for="@nameof(Model.Status)">@Model.GetDisplayName(nameof(Model.Status))</label>
+        </div>
+        <div class="col-sm-9">
+            <InputSelect class="form-control" id="status" @bind-Value="Model.Status">
+                <option value="">--Select--</option>
+                <option value="Todo">Todo</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+            </InputSelect>
+            <ValidationMessage For="@(() => Model.Status)" />
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public string FormId { get; set; } = "Form";
+    [Parameter] public TodoDetail? Model { get; set; } = new TodoDetail();
+    [Parameter] public EventCallback<TodoDetail> OnSubmit { get; set; }
+    private bool IsOpenDeleteModal = false;
+
+    private void SubmitHandle()
+    {
+        OnSubmit.InvokeAsync(Model);
+    }
+}
