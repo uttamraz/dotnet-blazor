@@ -20,7 +20,7 @@ This solution consists of two main components: a server and a client. The server
   - DotNetBlazor.Server (Server project)
   - DotNetBlazor.Client (Client project)
   - DotNetBlazor.Shared (Shared Library for both project)
-  - DotNetBlazor.Server.Test (Test project for derver)
+  - DotNetBlazor.Server.Test (Test project for server)
 
 ## Installation
 
