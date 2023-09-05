@@ -6,8 +6,8 @@ namespace DotNetBlazor.Client.Services
 
     public interface ITodoService
     {
-        Task<CreateTodoResponse> Create(CreateTodoRequest request);
-        Task<UpdateTodoResponse> Update(UpdateTodoRequest request);
+        Task<TodoResponse> Create(TodoRequest request);
+        Task<TodoResponse> Update(TodoRequest request);
         Task<DeleteTodoResponse> Delete(DeleteTodoRequest request);
         Task<TodoListResponse> List(TodoListRequest request);
     }
@@ -23,9 +23,9 @@ namespace DotNetBlazor.Client.Services
             _eventHelper = eventHelper;
         }
 
-        public async Task<CreateTodoResponse> Create(CreateTodoRequest request)
+        public async Task<TodoResponse> Create(TodoRequest request)
         {
-            return await _apiHelper.Post<CreateTodoResponse>("api/v1/todo/Create", request);
+            return await _apiHelper.Post<TodoResponse>("api/v1/todo/Create", request);
         }
 
         public async Task<DeleteTodoResponse> Delete(DeleteTodoRequest request)
@@ -39,9 +39,9 @@ namespace DotNetBlazor.Client.Services
             return list;
         }
 
-        public async Task<UpdateTodoResponse> Update(UpdateTodoRequest request)
+        public async Task<TodoResponse> Update(TodoRequest request)
         {
-            return await _apiHelper.Post<UpdateTodoResponse>("api/v1/todo/Update", request);
+            return await _apiHelper.Post<TodoResponse>("api/v1/todo/Update", request);
         }
     }
 }

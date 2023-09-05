@@ -2,35 +2,59 @@
 @implements IDisposable
 @inject IEventHelper EventHelper
 
-<button disabled="@IsLoading" class="btn btn-@Type" @onclick="HandleClick" @attributes="FormAttributes">
+<button disabled="@IsLoading" @attributes="ButtonAttributes">
     @if (IsLoading)
     {
         <span class="spinner-border spinner-border-sm mx-1"></span>
     }
-    @if (!string.IsNullOrWhiteSpace(Icon)) {
-        <span class="mx-1 oi oi-@Icon" aria-hidden="true"></span> 
+    @if (!string.IsNullOrWhiteSpace(Icon))
+    {
+        <span class="mx-1 oi oi-@Icon" aria-hidden="true"></span>
     }
     @Text
 </button>
 
 @code {
     [Parameter] public string Text { get; set; } = "Submit";
-    [Parameter] public string Type { get; set; } = "primary";
+    [Parameter] public string Btn { get; set; } = "primary";
+    [Parameter] public string? Type { get; set; } = "button";
     [Parameter] public string? FormId { get; set; }
     [Parameter] public string? Icon { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
 
     private bool IsLoading = false;
-    private Dictionary<string, object> FormAttributes => FormId != null ? new Dictionary<string, object>
+    private Dictionary<string, object> ButtonAttributes
+    {
+        get
         {
-            ["form"] = FormId
-        } : new Dictionary<string, object>();
+            var attributes = new Dictionary<string, object>();
+            if (!string.IsNullOrWhiteSpace(FormId))
+            {
+                attributes["form"] = FormId;
+            }
+            if (!string.IsNullOrWhiteSpace(Btn))
+            {
+                attributes["class"] = "btn btn-" + Btn;
+            }
+            if (!string.IsNullOrWhiteSpace(Type))
+            {
+                attributes["type"] = Type;
+            }
+            if (OnClick.HasDelegate)
+            {
+                attributes["onclick"] = EventCallback.Factory.Create(this, HandleClick);
+            }
+            return attributes;
+        }
+    }
+
 
     private async Task HandleClick()
     {
         if (OnClick.HasDelegate)
         {
             await OnClick.InvokeAsync();
+            StateHasChanged();
         }
     }
 

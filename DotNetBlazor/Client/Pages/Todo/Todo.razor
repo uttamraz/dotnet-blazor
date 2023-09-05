@@ -1,5 +1,4 @@
 @page "/todo"
-
 @using DotNetBlazor.Client.Components
 @using DotNetBlazor.Client.Pages.Todo.Components
 @using DotNetBlazor.Client.Services
@@ -23,7 +22,7 @@
         <div class="row">
             <div class="col-md-12">
                 <DataTable List="@list" Pagination="@pagination" PageChanged="HandlePageChange" Edit="HandleEdit"
-                    Delete="HandleDelete" />
+                           Delete="HandleDelete" />
             </div>
         </div>
     </div>
@@ -32,20 +31,20 @@
 <Modal Header="Create Task" IsOpen="IsOpenCreateModal" Close="()=> IsOpenCreateModal = false">
 
     <Body>
-        <TodoForm FormId="CreateForm" OnSubmit="Create" />
+        <TodoForm FormId="CreateForm" SubmitEvent="Create" />
     </Body>
     <Footer>
-        <SubmitButton FormId="CreateForm" Text="Create" Type="success" />
+        <SubmitButton FormId="CreateForm" Type="submit" Text="Create" Btn="success" />
     </Footer>
 </Modal>
 
 <Modal Header="Edit Task" IsOpen="IsOpenUpdateModal" Close="()=> IsOpenUpdateModal = false">
 
     <Body>
-        <TodoForm FormId="UpdateForm" Model="todoDetail" OnSubmit="Update" />
+        <TodoForm FormId="UpdateForm" Model="todoRequest" SubmitEvent="Update" />
     </Body>
     <Footer>
-        <SubmitButton FormId="UpdateForm" Text="Update" Type="success" />
+        <SubmitButton FormId="UpdateForm" Type="submit" Text="Update" Btn="success" />
     </Footer>
 </Modal>
 
@@ -64,7 +63,7 @@
     private List<TodoDetail> list = new();
     private ListRequest listRequest = new();
     private Pagination pagination = new();
-    private TodoDetail todoDetail = new();
+    private TodoRequest todoRequest = new();
     private DeleteTodoRequest deleteModel = new();
 
     private bool IsOpenCreateModal = false;
@@ -84,7 +83,7 @@
     private void HandleCreate() => IsOpenCreateModal = true;
     private void HandleEdit(object item)
     {
-        todoDetail = item.Map<TodoDetail>();
+        todoRequest = item.Map<TodoRequest>();
         IsOpenUpdateModal = true;
     }
     private void HandleDelete(object item)
@@ -112,21 +111,16 @@
         }
     }
 
-    private async Task Create(TodoDetail model)
+    private async Task Create(TodoRequest model)
     {
         try
         {
             // Logic for creating a new item
-            CreateTodoResponse response = await TodoService.Create(new CreateTodoRequest
-                {
-                    Name = model.Name,
-                    Description = model.Description,
-                    Status = model.Status
-                });
+            TodoResponse response = await TodoService.Create(model);
 
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
-                model = new TodoDetail(); // Clear the form
+                model = new TodoRequest(); // Clear the form
                 AlertService.Success("Todo created successfully!");
                 IsOpenCreateModal = false;
                 _ = List(listRequest);
@@ -142,21 +136,15 @@
         }
     }
 
-    private async Task Update(TodoDetail model)
+    private async Task Update(TodoRequest model)
     {
         try
         {
-            UpdateTodoResponse response = await TodoService.Update(new UpdateTodoRequest
-                {
-                    Id = model.Id,
-                    Name = model.Name,
-                    Description = model.Description,
-                    Status = model.Status
-                });
+            TodoResponse response = await TodoService.Update(model);
 
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
-                model = new TodoDetail();
+                model = new TodoRequest();
                 AlertService.Success("Todo updated successfully!");
                 IsOpenUpdateModal = false;
                 _ = List(listRequest);
