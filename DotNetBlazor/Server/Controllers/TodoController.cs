@@ -16,9 +16,9 @@ namespace DotNetBlazor.Server.Controllers
         }
 
         [HttpPost("Create")]
-        [ProducesResponseType(typeof(CreateTodoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TodoResponse), StatusCodes.Status200OK)]
 
-        public async Task<IActionResult> Create(CreateTodoRequest request)
+        public async Task<IActionResult> Create(TodoRequest request)
         {
             var data = await _todoService.Create(request);
             if (data != null)
@@ -29,9 +29,9 @@ namespace DotNetBlazor.Server.Controllers
         }
 
         [HttpPost("Update")]
-        [ProducesResponseType(typeof(UpdateTodoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TodoResponse), StatusCodes.Status200OK)]
 
-        public async Task<IActionResult> Update(UpdateTodoRequest request)
+        public async Task<IActionResult> Update(TodoRequest request)
         {
             var data = await _todoService.Update(request);
             if (data != null)

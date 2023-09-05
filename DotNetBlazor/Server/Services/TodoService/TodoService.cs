@@ -17,7 +17,7 @@ namespace DotNetBlazor.Server.Services.TodoService
             _contextHelper = contextHelper;
         }
 
-        public async Task<TodoDetail> Create(CreateTodoRequest request)
+        public async Task<TodoDetail> Create(TodoRequest request)
         {
             var todo = request.Map<Todo>();
             todo.UserId = _contextHelper.Id();
@@ -36,7 +36,7 @@ namespace DotNetBlazor.Server.Services.TodoService
             return await _todoRepository.List(request);
         }
 
-        public async Task<TodoDetail> Update(UpdateTodoRequest request)
+        public async Task<TodoDetail> Update(TodoRequest request)
         {
             var todo = request.Map<Todo>();
             todo.UserId = _contextHelper.Id();
