@@ -5,6 +5,7 @@
 @using DotNetBlazor.Client.Utility;
 @using DotNetBlazor.Shared.Models.Account;
 @using System.Net;
+@using System.Web;
 @using DotNetBlazor.Shared.Models.Common;
 
 @inject IAccountService AccountService
@@ -34,7 +35,7 @@
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
                             <InputText id="password" @bind-Value="model.Password" type="password"
-                                class="form-control" />
+                                       class="form-control" />
                             <ValidationMessage For="@(() => model.Password)" />
                         </div>
 
@@ -50,8 +51,6 @@
 
 @code {
     private LoginRequest model = new();
-
-    [SupplyParameterFromQuery]
     public string? returnUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -59,6 +58,12 @@
         if (await AccountService.IsAuthenticated())
         {
             NavigationManager.NavigateTo("/");
+        }
+        var uri = new Uri(NavigationManager.Uri);
+        var queryParameters = HttpUtility.ParseQueryString(uri.Query);
+        if (!string.IsNullOrWhiteSpace(queryParameters["returnUrl"]))
+        {
+            returnUrl = HttpUtility.UrlDecode(queryParameters["returnUrl"]);
         }
     }
 
@@ -70,6 +75,7 @@
             var response = await AccountService.LoginAsync(model);
             if (response?.Response?.Status == (int)HttpStatusCode.OK)
             {
+                Console.WriteLine(returnUrl);
                 NavigationManager.NavigateTo(returnUrl ?? "/");
             }
             else

@@ -12,9 +12,9 @@
     </div>
 
     <main>
-         <div class="top-row px-4 d-flex align-items-center">
+        <div class="top-row px-4 d-flex align-items-center">
             <h3 class="page-title flex-grow-1">@pageTitle</h3>
-            <button class="btn btn-default" @onclick="Logout">
+            <button class="btn btn-default" @onclick="()=> IsOpenLogoutModal = true">
                 <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
             </button>
         </div>
@@ -25,10 +25,21 @@
     </main>
 </div>
 
+<Modal Header="Logout" IsOpen="IsOpenLogoutModal" Close="()=> IsOpenLogoutModal = false">
+
+    <Body>
+        <p>Are you sure want to logout?</p>
+    </Body>
+    <Footer>
+        <SubmitButton Text="Logout" Type="danger" OnClick="Logout" />
+    </Footer>
+</Modal>
 
 @code {
 
-    private string pageTitle = "Dashboard"; 
+    private string pageTitle = "Dashboard";
+    private bool IsOpenLogoutModal = false;
+
     public void SetPageTitle(string title)
     {
         pageTitle = title;
@@ -42,7 +53,7 @@
     }
     private async Task Logout()
     {
-        await AccountService.LogoutAsync(); 
+        await AccountService.LogoutAsync();
         NavigationManager.NavigateTo("/login");
     }
 }

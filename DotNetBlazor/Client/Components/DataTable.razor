@@ -9,7 +9,8 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="dataTables_length">
-                    <label>Show
+                    <label>
+                        Show
                         <select class="form-select form-select-sm" @bind="listRequest.PerPage"
                         @oninput="HandlePerPageChange">
                             <option value="5">5</option>
@@ -23,10 +24,13 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div id="example_filter" class="dataTables_filter"><label>Search:
+                <div id="example_filter" class="dataTables_filter">
+                    <label>
+                        Search:
                         <input type="search" class="form-control form-control-sm" @bind="listRequest.Query"
-                            placeholder="Search ..." @oninput="HandleQueryChange" />
-                    </label></div>
+                               placeholder="Search ..." @oninput="HandleQueryChange" />
+                    </label>
+                </div>
             </div>
         </div>
         <div class="row dt-row">
@@ -79,7 +83,8 @@
         </div>
         <div class="row">
             <div class="col-md-5">
-                <div class="dataTables_info">Showing @((Pagination.Page - 1) * Pagination.PerPage + 1) to
+                <div class="dataTables_info">
+                    Showing @((Pagination.Page - 1) * Pagination.PerPage + 1) to
                     @(Math.Min(Pagination.Total, Pagination.Page * Pagination.PerPage)) of @Pagination.Total entries
                 </div>
             </div>
@@ -97,8 +102,7 @@
                                 <a @onclick="() => GoToPage(currentPage)" class="page-link">@i</a>
                             </li>
                         }
-                        <li
-                            class="paginate_button page-item next @(Pagination.Page >= Pagination.TotalPage() ? "disabled" : "")">
+                        <li class="paginate_button page-item next @(Pagination.Page >= Pagination.TotalPage() ? "disabled" : "")">
                             <a @onclick="GoToNextPage" class="page-link">Next</a>
                         </li>
                     </ul>
@@ -169,11 +173,17 @@
 
     private void EditItem(object item)
     {
-        Edit.InvokeAsync(item);
+        if (Edit.HasDelegate)
+        {
+            Edit.InvokeAsync(item);
+        }
     }
 
     private void DeleteItem(object item)
     {
-        Delete.InvokeAsync(item);
+        if (Delete.HasDelegate)
+        {
+            Delete.InvokeAsync(item);
+        }
     }
 }

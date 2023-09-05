@@ -16,18 +16,18 @@
         if (CurrentEditContext == null)
         {
             throw new InvalidOperationException(
-                $"{nameof(ValidationError)} requires a cascading " +
-                $"parameter of type {nameof(EditContext)}. " +
-                $"For example, you can use {nameof(ValidationError)} " +
-                $"inside an {nameof(EditForm)}.");
+            $"{nameof(ValidationError)} requires a cascading " +
+            $"parameter of type {nameof(EditContext)}. " +
+            $"For example, you can use {nameof(ValidationError)} " +
+            $"inside an {nameof(EditForm)}.");
         }
 
         messageStore = new ValidationMessageStore(CurrentEditContext);
 
         CurrentEditContext.OnValidationRequested += (s, e) =>
-            messageStore.Clear();
+        messageStore.Clear();
         CurrentEditContext.OnFieldChanged += (s, e) =>
-            messageStore.Clear(e.FieldIdentifier);
+        messageStore.Clear(e.FieldIdentifier);
     }
 
     public void DisplayErrors(List<Error> errors)
