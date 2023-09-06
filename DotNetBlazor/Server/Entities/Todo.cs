@@ -16,6 +16,8 @@ namespace DotNetBlazor.Server.Entities
         public string Name { get; set; } = null!;
         [Required, MaxLength(500), MinLength(2)]
         public string Description { get; set; } = null!;
+        [Required, Range(0, 100)]
+        public int Progress { get; set; }
         [Required, MaxLength(15), MinLength(2)]
         public string Status { get; set; } = null!; // To Do, In Progress, Done
         public DateTime CreatedDate { get; set; } = DateTime.Now;

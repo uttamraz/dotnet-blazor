@@ -32,6 +32,8 @@ namespace DotNetBlazor.Server.Repository.TodoRepository
             {
                 data.Name = request.Name;
                 data.Description = request.Description;
+                data.Status = request.Status;
+                data.Progress = request.Progress;
                 data.LastModifiedDate = DateTime.Now;
                 await context.SaveChangesAsync();
                 // AutoMapper

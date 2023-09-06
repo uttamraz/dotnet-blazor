@@ -1,0 +1,53 @@
+﻿@using DotNetBlazor.Client.Components
+@using DotNetBlazor.Client.Services;
+@using DotNetBlazor.Client.Utility;
+@using DotNetBlazor.Shared.Models.Common;
+@using DotNetBlazor.Shared.Models.Todo;
+@using System.Net;
+@inject ITodoService TodoService
+@inject IAlertService AlertService
+
+
+<div class="card-body">
+    <div class="card-body">
+        <h5 class="d-flex align-items-center mb-3">Task Status</h5>
+        @foreach (var item in list)
+        {
+            <p>@item.Name</p>
+            <ProgressBar Progress="@item.Progress" />
+        }
+    </div>
+</div>
+
+
+@code {
+    private List<TodoDetail> list = new();
+    private ListRequest listRequest = new();
+    private Pagination pagination = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        listRequest.Page = 1;
+        listRequest.PerPage = 5;
+        await List(listRequest);
+    }
+
+    private async Task List(ListRequest listRequest)
+    {
+        try
+        {
+            TodoListResponse response = await TodoService.List(listRequest.Map<TodoListRequest>());
+
+            if (response?.Response?.Status == (int)HttpStatusCode.OK)
+            {
+                list = response.Data.List;
+                pagination = response.Data.Pagination;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+        }
+    }
+}

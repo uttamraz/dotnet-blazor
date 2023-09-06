@@ -35,13 +35,23 @@
             <label for="@nameof(Model.Status)">@Model.GetDisplayName(nameof(Model.Status))</label>
         </div>
         <div class="col-sm-9">
-            <InputSelect class="form-control" @bind-Value="Model.Status">
+            <InputSelect class="form-control" @bind-Value="Model.Status" @oninput="HandleProgress">
                 <option value="">--Select--</option>
                 <option value="Todo">Todo</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Done">Done</option>
             </InputSelect>
             <ValidationMessage For="@(() => Model.Status)" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-3">
+            <label for="@nameof(Model.Progress)">@Model.GetDisplayName(nameof(Model.Progress))</label>
+        </div>
+        <div class="col-sm-9">
+            <input type="range" class="form-control-range" @bind="Model.Progress" min="0" max="100" @bind:event="oninput" style="width:100%;" title="@(Model.Progress+" %")" disabled="@IsProgressDisabled"/>
+            <ValidationMessage For="@(() => Model.Progress)" />
         </div>
     </div>
 </EditForm>
@@ -51,6 +61,31 @@
     [Parameter] public TodoRequest? Model { get; set; } = new();
     [Parameter] public EventCallback<TodoRequest> SubmitEvent { get; set; }
     private bool IsOpenDeleteModal = false;
+    private bool IsProgressDisabled = true;
+    private int progress = 0;
+
+    protected override void OnInitialized()
+    {
+        SetProgress(Model.Status);
+    }
+
+    private void HandleProgress(ChangeEventArgs e)
+    {
+        SetProgress(e.Value.ToString());
+    }
+
+    private void SetProgress(string status)
+    {
+        if (status == "In Progress")
+        {
+            IsProgressDisabled = false;
+        }
+        else
+        {
+            IsProgressDisabled = true;
+            Model.Progress = status == "Done" ? 100 : 0;
+        }
+    }
 
     private void SubmitHandle()
     {
