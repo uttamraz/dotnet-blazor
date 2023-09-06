@@ -1,10 +1,5 @@
 ﻿using Bogus;
 using DotNetBlazor.Shared.Models.Account;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DotNetBlazor.Server.Test.Helper
 {
@@ -15,6 +10,7 @@ namespace DotNetBlazor.Server.Test.Helper
             var faker = new Faker<RegistrationRequest>()
                 .RuleFor(r => r.FullName, f => f.Name.FullName())
                 .RuleFor(r => r.Email, f => f.Internet.Email())
+                .RuleFor(r => r.Mobile, f => f.Phone.PhoneNumber())
                 .RuleFor(r => r.Password, f => f.Random.Replace("??????#?#?#?#?#?#?#?#?#?#?#?#?#?#?#?#?#"));
 
             return faker.Generate();
@@ -25,6 +21,7 @@ namespace DotNetBlazor.Server.Test.Helper
             {
                 Email = "user@example.com",
                 FullName = "Full Name",
+                Mobile = "9876543210",
                 Password = "password"
             };
         }
