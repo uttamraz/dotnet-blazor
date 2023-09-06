@@ -1,0 +1,28 @@
+﻿<div class="progress mb-3">
+    <div class="progress-bar @GetProgressBarClass(Progress)" role="progressbar" style="width: @Progress%" aria-valuenow="@Progress" aria-valuemin="0" aria-valuemax="100">@Progress%</div>
+</div>
+@code {
+    [Parameter] public int Progress { get; set; }
+
+    private string GetProgressBarClass(int progress)
+    {
+        string progressBarClass = "bg-info";
+        if (progress <= 25)
+        {
+            progressBarClass = "bg-danger";
+        }
+        else if (progress <= 50)
+        {
+            progressBarClass = "bg-warning";
+        }
+        else if (progress <= 75)
+        {
+            progressBarClass = "bg-primary";
+        }
+        else if (progress <= 100)
+        {
+            progressBarClass = "bg-success";
+        }
+        return progressBarClass;
+    }
+}

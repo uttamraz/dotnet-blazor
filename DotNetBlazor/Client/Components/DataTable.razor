@@ -56,7 +56,17 @@
                             <tr>
                                 @foreach (var prop in typeof(T).GetProperties())
                                 {
-                                    <td>@prop.GetValue(item)</td>
+                                    <td>
+                                        @if (prop.GetDisplayName() == "Progress")
+                                        {
+                                            <ProgressBar Progress="@Convert.ToInt32(prop.GetValue(item))" />
+                                        }
+                                        else
+                                        {
+                                            @prop.GetValue(item)
+                                        }
+
+                                    </td>
                                 }
                                 @if (Edit.HasDelegate || Delete.HasDelegate)
                                 {
