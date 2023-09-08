@@ -18,9 +18,9 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GAR_LOCATION: europe-west2 # TODO: update region of the Artifact Registry
+  GAR_LOCATION: eu-west2 # TODO: update region of the Artifact Registry
   GKE_CLUSTER: dotnet-blazor-clustor    # TODO: update to cluster name
-  GKE_ZONE: europe-west2   # TODO: update to cluster zone
+  GKE_ZONE: europe-west2-a   # TODO: update to cluster zone
   DEPLOYMENT_NAME: gke-deploy # TODO: update to deployment name
   REPOSITORY: dotnet-blazor-repository # TODO: update to Artifact Registry docker repository
   IMAGE: dotnet-blazor-image
