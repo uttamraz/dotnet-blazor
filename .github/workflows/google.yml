@@ -22,8 +22,8 @@ env:
   GKE_CLUSTER: dotnet-blazor-clustor    # TODO: update to cluster name
   GKE_ZONE: europe-west2   # TODO: update to cluster zone
   DEPLOYMENT_NAME: gke-deploy # TODO: update to deployment name
-  REPOSITORY: samples # TODO: update to Artifact Registry docker repository
-  IMAGE: static-site
+  REPOSITORY: dotnet-blazor-repository # TODO: update to Artifact Registry docker repository
+  IMAGE: dotnet-blazor-image
 
 jobs:
   setup-build-publish-deploy:
